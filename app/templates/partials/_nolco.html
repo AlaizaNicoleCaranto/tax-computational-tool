@@ -1,0 +1,56 @@
+{# ============================================================ PARTIAL: NOLCO
+SCHEDULE (BIR 6.A.1)
+============================================================ #}
+
+<div class="itemized-panel">
+  <div class="itemized-header">Net Operating Loss Carry Over (NOLCO)</div>
+
+  <div style="padding: 20px">
+    <div
+      style="
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--color-primary);
+        margin-bottom: 12px;
+      "
+    >
+      6.A.1 - Taxpayer/Filer's Detailed Computation of Available NOLCO
+    </div>
+
+    <div class="nolco-table-container">
+      <table class="nolco-table">
+        <thead>
+          <tr>
+            <th colspan="2">Net Operating Loss</th>
+            <th rowspan="2">B. NOLCO Applied<br />Previous Year/s</th>
+            <th rowspan="2">C. NOLCO Expired</th>
+            <th rowspan="2">D. NOLCO Applied<br />Current Year</th>
+            <th rowspan="2">
+              E. Net Operating Loss<br />(Unapplied)<br /><small
+                >[E = A - (B + C + D)]</small
+              >
+            </th>
+          </tr>
+          <tr>
+            <th>Year Incurred</th>
+            <th>A. Amount</th>
+          </tr>
+        </thead>
+        <tbody id="nolcoTableBody"></tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="4" style="text-align: right">
+              Total NOLCO Applied Current Year
+            </td>
+            <td id="totalNolcoD">PHP 0.00</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <button type="button" class="add-btn" data-action="add-nolco-row">
+      + Add NOLCO Row
+    </button>
+  </div>
+</div>

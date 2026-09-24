@@ -1,0 +1,134 @@
+/* ============================================================
+   PRINT STYLES
+   ============================================================
+   Loaded only when the page is sent to a printer. Hides
+   navigation, buttons, and form controls so that the
+   printed output contains only the computed results.
+   ============================================================ */
+
+@media print {
+
+    @page {
+        margin: 1.5cm;
+        size: A4 portrait;
+    }
+
+    body {
+        background: #fff;
+        color: #000;
+        font-size: 11pt;
+    }
+
+    .container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Hide non-printable elements */
+    .navbar,
+    .footer,
+    .flash,
+    .btn,
+    .add-btn,
+    .remove-btn,
+    .scheme-card-header p,
+    [data-action],
+    input[type="text"],
+    input[type="radio"],
+    .dynamic-row input,
+    .deduction-row input,
+    .nolco-table input {
+        display: none !important;
+    }
+
+    /* Hide input sections; keep only results */
+    .section:not(.scheme-section):not(.recommendation-section) {
+        display: none !important;
+    }
+
+    /* Keep view page visible */
+    .view-header,
+    .scheme-block,
+    .recommendation {
+        display: block !important;
+    }
+
+    /* Cards and panels */
+    .card,
+    .scheme-card,
+    .scheme-block,
+    .recommendation,
+    .best-card,
+    .itemized-panel {
+        box-shadow: none !important;
+        border: 1px solid #999 !important;
+        page-break-inside: avoid;
+        background: #fff !important;
+    }
+
+    .scheme-card.is-best,
+    .scheme-block.is-best {
+        border: 2px solid #2e7d32 !important;
+    }
+
+    .scheme-card-header,
+    .scheme-block-header {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+        border-bottom: 1px solid #999;
+    }
+
+    .scheme-card.is-best .scheme-card-header,
+    .scheme-block.is-best .scheme-block-header {
+        background: #e8f5e9 !important;
+        color: #1b5e20 !important;
+    }
+
+    /* Result rows */
+    .compute-row {
+        border-bottom: 1px solid #ddd;
+        font-size: 10pt;
+    }
+
+    .compute-row.total {
+        background: #f0f0f0 !important;
+        font-weight: 700;
+        border-top: 2px solid #333;
+    }
+
+    .scheme-card.is-best .compute-row.total,
+    .scheme-block.is-best .compute-row.total {
+        background: #e8f5e9 !important;
+    }
+
+    /* VAT warning */
+    .vat-warning {
+        background: #fff3e0 !important;
+        border-left: 3px solid #e65100;
+        color: #e65100;
+    }
+
+    /* Single column on print */
+    .scheme-grid {
+        display: block !important;
+    }
+
+    .scheme-card {
+        margin-bottom: 16px;
+        page-break-inside: avoid;
+    }
+
+    /* Show URLs after links */
+    a[href]:after {
+        content: " (" attr(href) ")";
+        font-size: 9pt;
+        color: #666;
+    }
+
+    a[href^="#"]:after,
+    a[href^="javascript:"]:after {
+        content: "";
+    }
+
+}

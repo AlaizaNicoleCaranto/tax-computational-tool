@@ -1,0 +1,44 @@
+{# ============================================================ PARTIAL:
+BUSINESS / PROFESSIONAL INCOME (STEP 2)
+============================================================ #}
+
+<div class="wizard-step" data-step="2">
+  <div class="section">
+    <div class="section-title">2. Business / Professional Income</div>
+
+    <div class="input-grid">
+      <div class="input-group">
+        <label>Sales / Receipts - Cash</label>
+        <div class="input-box">
+          <span class="prefix">PHP</span>
+          <input type="text" id="cashSales" value="0" inputmode="decimal" />
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Sales / Receipts - Accrual</label>
+        <div class="input-box">
+          <span class="prefix">PHP</span>
+          <input type="text" id="accrualSales" value="0" inputmode="decimal" />
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px">
+      <label
+        style="
+          display: block;
+          font-size: 15px;
+          font-weight: 600;
+          margin-bottom: 10px;
+        "
+      >
+        Other Non-Operating Income
+      </label>
+      <div id="otherIncomeList" class="dynamic-list"></div>
+      <button type="button" class="add-btn" data-action="add-other-income">
+        + Add Other Income
+      </button>
+    </div>
+  </div>
+</div>

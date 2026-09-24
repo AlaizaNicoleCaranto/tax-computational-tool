@@ -1,0 +1,77 @@
+{# ============================================================ PARTIAL:
+ITEMIZED DEDUCTIONS (STEP 3)
+============================================================ #}
+
+<div class="wizard-step" data-step="3">
+  <div class="section">
+    <div class="section-title">3. Itemized Deduction Information</div>
+
+    <div class="info-box">
+      These fields are used by the
+      <strong
+        >Graduated Income Tax with Itemized Deduction and Percentage Tax</strong
+      >
+      computation.
+    </div>
+
+    {# Cost of sales or services #}
+    <div style="margin-top: 20px">
+      <div class="input-group">
+        <label>Cost of Sales / Services</label>
+        <div class="input-grid" style="margin-top: 10px">
+          <div class="input-group">
+            <label>Cash</label>
+            <div class="input-box">
+              <span class="prefix">PHP</span>
+              <input type="text" id="cashCost" value="0" inputmode="decimal" />
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Accrual</label>
+            <div class="input-box">
+              <span class="prefix">PHP</span>
+              <input
+                type="text"
+                id="accrualCost"
+                value="0"
+                inputmode="decimal"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="total-display">
+        <span>Total Cost of Sales / Services</span>
+        <span id="totalCostDisplay">PHP 0.00</span>
+      </div>
+    </div>
+
+    {# Ordinary deductions #}
+    <div class="itemized-panel">
+      <div class="itemized-header">Ordinary Allowable Itemized Deductions</div>
+      <div id="ordinaryDeductions" class="deduction-grid"></div>
+    </div>
+
+    {# Special deductions #}
+    <div class="itemized-panel">
+      <div class="itemized-header">Special Allowable Itemized Deductions</div>
+      <div
+        id="specialDeductions"
+        class="dynamic-list"
+        style="padding: 20px"
+      ></div>
+      <div style="padding: 0 20px 20px">
+        <button
+          type="button"
+          class="add-btn"
+          data-action="add-special-deduction"
+        >
+          + Add Special Deduction
+        </button>
+      </div>
+    </div>
+
+    {# NOLCO #} {% include "partials/_nolco.html" %}
+  </div>
+</div>

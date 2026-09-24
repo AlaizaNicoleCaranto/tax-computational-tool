@@ -1,0 +1,88 @@
+{# ============================================================ PARTIAL: TAX
+SCHEME RESULTS (STEP 4)
+============================================================ #}
+
+<div class="wizard-step" data-step="4">
+  <div class="scheme-section">
+    <div class="section-title">4. Tax Scheme Computations</div>
+
+    <div class="scheme-grid">
+      {# Scheme 1 #}
+      <div class="scheme-card" id="osdCard">
+        <div class="scheme-card-header">
+          <h3>Graduated Income Tax with OSD and Percentage Tax</h3>
+          <p>Tax Scheme 1</p>
+        </div>
+        <div class="scheme-body" id="osdResult">
+          <div class="compute-row">
+            <span>Enter your income to compute</span>
+            <span class="amount">PHP 0.00</span>
+          </div>
+        </div>
+      </div>
+
+      {# Scheme 2 #}
+      <div class="scheme-card" id="itemizedCard">
+        <div class="scheme-card-header">
+          <h3>
+            Graduated Income Tax with Itemized Deduction and Percentage Tax
+          </h3>
+          <p>Tax Scheme 2</p>
+        </div>
+        <div class="scheme-body" id="itemizedResult">
+          <div class="compute-row">
+            <span>Enter your income to compute</span>
+            <span class="amount">PHP 0.00</span>
+          </div>
+        </div>
+      </div>
+
+      {# Scheme 3 #}
+      <div class="scheme-card" id="eightCard">
+        <div class="scheme-card-header">
+          <h3>Optional Income Tax Rate</h3>
+          <p>
+            Tax Scheme 3 (In lieu of graduated income tax and percentage tax)
+          </p>
+        </div>
+        <div class="scheme-body" id="eightResult">
+          <div class="compute-row">
+            <span>Enter your income to compute</span>
+            <span class="amount">PHP 0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="recommendation-section">
+    <div id="bestScheme" class="best-card">
+      Enter income and deduction values to see the recommended tax scheme.
+    </div>
+  </div>
+
+  <div
+    class="section"
+    style="border-top: 1px solid var(--color-border); border-bottom: none"
+  >
+    <div
+      style="
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      "
+    >
+      <button type="button" class="btn btn-secondary" data-action="reset-form">
+        Reset
+      </button>
+      <button
+        type="button"
+        class="btn btn-success"
+        data-action="save-computation"
+      >
+        Save Computation
+      </button>
+    </div>
+  </div>
+</div>

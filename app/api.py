@@ -1,0 +1,239 @@
+# ============================================================
+# API ROUTES
+# ============================================================
+
+from datetime import datetime, timedelta
+
+from flask import Blueprint, jsonify, request
+from flask_login import current_user, login_required
+
+from app import db
+from app.models import Computation
+from app.tax import (
+    compute_eight_percent,
+    compute_itemized,
+    compute_osd,
+    recommend_scheme,
+)
+
+api_bp = Blueprint("api", __name__, url_prefix="/api")
+
+DUPLICATE_WINDOW_MINUTES = 5
+
+
+# ============================================================
+# SHARED HELPERS
+# ============================================================
+
+
+def build_results(data):
+    """
+    Run the three tax schemes and return the result
+    dictionary plus the recommendation.
+    """
+    osd_result = compute_osd(data)
+    itemized_result = compute_itemized(data)
+    eight_result = compute_eight_percent(data)
+
+    recommendation = recommend_scheme(
+        osd_result, itemized_result, eight_result
+    )
+
+    results = {
+        "osd": osd_result,
+        "itemized": itemized_result,
+        "eight": eight_result,
+        "best_scheme": recommendation["best_scheme"],
+        "best_tax": recommendation["best_tax"],
+    }
+
+    return results, recommendation
+
+
+def has_any_input(data):
+    """
+    Return True if the payload contains at least one non-zero
+    numeric value. Used to reject empty submissions.
+    """
+    numeric_fields = (
+        "gross_compensation",
+        "non_taxable_compensation",
+        "cash_sales",
+        "accrual_sales",
+        "cash_cost",
+        "accrual_cost",
+    )
+
+    for field in numeric_fields:
+        try:
+            if float(data.get(field, 0) or 0) > 0:
+                return True
+        except (ValueError, TypeError):
+            continue
+
+    # Other income list
+    items = data.get("other_income", [])
+    if isinstance(items, list):
+        for item in items:
+            try:
+                if float(item.get("amount", 0) or 0) > 0:
+                    return True
+            except (ValueError, TypeError):
+                continue
+
+    # Ordinary deductions dict
+    items = data.get("ordinary_deductions", {})
+    if isinstance(items, dict):
+        for value in items.values():
+            try:
+                if float(value or 0) > 0:
+                    return True
+            except (ValueError, TypeError):
+                continue
+
+    # Special deductions list
+    items = data.get("special_deductions", [])
+    if isinstance(items, list):
+        for item in items:
+            try:
+                if float(item.get("amount", 0) or 0) > 0:
+                    return True
+            except (ValueError, TypeError):
+                continue
+
+    # NOLCO rows
+    items = data.get("nolco", [])
+    if isinstance(items, list):
+        for row in items:
+            for col in ("a", "b", "c", "d"):
+                try:
+                    if float(row.get(col, 0) or 0) > 0:
+                        return True
+                except (ValueError, TypeError):
+                    continue
+
+    return False
+
+
+# ============================================================
+# COMPUTE ONLY (no save)
+# ============================================================
+
+
+@api_bp.route("/compute", methods=["POST"])
+@login_required
+def compute():
+    """
+    Compute all three tax schemes without saving anything.
+    Safe to call on every keystroke.
+    """
+    data = request.get_json(silent=True)
+
+    if not data:
+        return jsonify({"error": "No data provided."}), 400
+
+    taxpayer_type = data.get("taxpayer_type", "pure")
+    if taxpayer_type not in ("pure", "mixed"):
+        return jsonify({"error": "Invalid taxpayer type."}), 400
+
+    results, _ = build_results(data)
+
+    return jsonify({
+        "results": results,
+        "message": "Computation complete.",
+    })
+
+
+# ============================================================
+# COMPUTE AND SAVE
+# ============================================================
+
+
+@api_bp.route("/save", methods=["POST"])
+@login_required
+def save():
+    """
+    Compute the tax schemes, save the result, and return it
+    as JSON. Rejects empty submissions.
+    """
+    data = request.get_json(silent=True)
+
+    if not data:
+        return jsonify({"error": "No data provided."}), 400
+
+    taxpayer_type = data.get("taxpayer_type", "pure")
+    if taxpayer_type not in ("pure", "mixed"):
+        return jsonify({"error": "Invalid taxpayer type."}), 400
+
+    # Reject empty submissions. A computation with no
+    # amounts at all is not meaningful.
+    if not has_any_input(data):
+        return jsonify({
+            "error": "Please enter at least one income or "
+                     "deduction amount before saving."
+        }), 400
+
+    results, recommendation = build_results(data)
+
+    # Duplicate detection
+    cutoff = datetime.utcnow() - timedelta(
+        minutes=DUPLICATE_WINDOW_MINUTES
+    )
+
+    recent_records = (
+        Computation.query
+        .filter(Computation.user_id == current_user.id)
+        .filter(Computation.created_at >= cutoff)
+        .all()
+    )
+
+    duplicate_of = None
+    for record in recent_records:
+        if record.inputs == data:
+            duplicate_of = record.id
+            break
+
+    # Persist
+    try:
+        computation = Computation(
+            user_id=current_user.id,
+            taxpayer_type=taxpayer_type,
+            inputs=data,
+            results=results,
+            best_scheme=recommendation["best_scheme"],
+            best_tax=recommendation["best_tax"],
+        )
+        db.session.add(computation)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({"error": "Failed to save computation."}), 500
+
+    return jsonify({
+        "id": computation.id,
+        "results": results,
+        "duplicate": duplicate_of is not None,
+        "duplicate_of": duplicate_of,
+        "message": "Computation saved.",
+    })
+
+
+# ============================================================
+# LIST SAVED COMPUTATIONS
+# ============================================================
+
+
+@api_bp.route("/history", methods=["GET"])
+@login_required
+def history():
+    """
+    Return the current user's saved computations as JSON.
+    """
+    computations = (
+        Computation.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Computation.created_at.desc())
+        .all()
+    )
+
+    return jsonify([c.to_dict() for c in computations])

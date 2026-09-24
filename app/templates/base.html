@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Tax Computational Tool{% endblock %}</title>
+
+    <style>
+      :root {
+        --color-primary: #285e61;
+        --color-primary-hover: #1a4042;
+        --color-primary-light: #e6f0f1;
+        --color-primary-lighter: #f0f7f8;
+        --color-accent: #dd6b20;
+        --color-accent-light: #fff5eb;
+        --color-bg: #f0f4f8;
+        --color-surface: #ffffff;
+        --color-surface-alt: #f7fafc;
+        --color-sidebar-bg: #1f3d3f;
+        --color-sidebar-hover: #2a5255;
+        --color-sidebar-active: #285e61;
+        --color-text: #1a202c;
+        --color-text-muted: #64748b;
+        --color-text-light: #94a3b8;
+        --color-border: #e2e8f0;
+        --color-border-strong: #cbd5e0;
+        --color-success: #2f855a;
+        --color-success-light: #e6fffa;
+        --color-warning: #dd6b20;
+        --color-warning-light: #fff5eb;
+        --color-danger: #c53030;
+        --color-danger-light: #fff5f5;
+        --sidebar-width: 470px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 18px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
+        --font-size-base: 26px;
+        --font-size-sm: 22px;
+        --font-size-md: 24px;
+        --font-size-lg: 28px;
+        --font-size-xl: 36px;
+        --font-size-2xl: 44px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+
+      body {
+        background: var(--color-bg);
+        min-height: 100vh;
+        color: var(--color-text);
+        font-size: var(--font-size-base);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      /* ====================================================
+           MOBILE HEADER
+           ==================================================== */
+      .mobile-header {
+        display: none;
+        background: var(--color-sidebar-bg);
+        color: #fff;
+        padding: 18px 22px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 400;
+        box-shadow: var(--shadow-md);
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .mobile-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .mobile-brand .brand-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        background: var(--color-primary);
+        border-radius: var(--radius-md);
+        font-size: 21px;
+        font-weight: 700;
+      }
+
+      .burger-btn {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 30px;
+        cursor: pointer;
+        padding: 6px 16px;
+        border-radius: var(--radius-sm);
+        line-height: 1;
+        transition: background 0.2s;
+      }
+
+      .burger-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 200;
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+
+      /* ====================================================
+           APP LAYOUT
+           ==================================================== */
+      .app-layout {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* ====================================================
+           SIDEBAR
+           ==================================================== */
+      .sidebar {
+        width: var(--sidebar-width);
+        background: var(--color-sidebar-bg);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        overflow-y: auto;
+        z-index: 300;
+      }
+
+      .sidebar-header {
+        padding: 36px 32px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        color: #fff;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+        line-height: 1.3;
+      }
+
+      .sidebar-brand .brand-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 58px;
+        height: 58px;
+        background: var(--color-primary);
+        border-radius: var(--radius-md);
+        font-size: 28px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .sidebar-nav {
+        flex: 1;
+        padding: 36px 22px;
+        overflow-y: auto;
+      }
+
+      .sidebar-section-label {
+        font-size: 15px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.6px;
+        color: rgba(255, 255, 255, 0.45);
+        padding: 0 20px 16px;
+      }
+
+      .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 22px 24px;
+        border-radius: var(--radius-md);
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 24px;
+        font-weight: 500;
+        transition:
+          background 0.2s,
+          color 0.2s;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .sidebar-link:hover {
+        background: var(--color-sidebar-hover);
+        color: #fff;
+      }
+
+      .sidebar-link.active {
+        background: var(--color-sidebar-active);
+        color: #fff;
+        font-weight: 600;
+      }
+
+      .sidebar-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        font-size: 28px;
+        flex-shrink: 0;
+      }
+
+      .sidebar-footer {
+        padding: 26px 22px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .sidebar-logout {
+        display: block;
+        padding: 24px 26px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: var(--radius-md);
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 24px;
+        font-weight: 600;
+        text-align: center;
+        transition:
+          background 0.2s,
+          border-color 0.2s;
+      }
+
+      .sidebar-logout:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.35);
+        color: #fff;
+      }
+
+      /* ====================================================
+           MAIN CONTENT
+           ==================================================== */
+      .main-content {
+        flex: 1;
+        margin-left: var(--sidebar-width);
+        min-width: 0;
+        position: relative;
+      }
+
+      .content-user {
+        position: absolute;
+        top: 32px;
+        right: 44px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        z-index: 10;
+      }
+
+      .content-user .user-details {
+        text-align: right;
+      }
+
+      .content-user .user-name {
+        font-size: var(--font-size-md);
+        font-weight: 600;
+        color: var(--color-text);
+        line-height: 1.3;
+      }
+
+      .content-user .user-email {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-muted);
+        line-height: 1.3;
+      }
+
+      .content-user .user-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        background: var(--color-primary);
+        border-radius: 50%;
+        font-size: 26px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 140px 40px 48px;
+      }
+
+      .public-layout {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+      }
+
+      .public-layout .container {
+        max-width: 620px;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .flash {
+        padding: 22px 28px;
+        border-radius: var(--radius-md);
+        margin-bottom: 28px;
+        font-size: var(--font-size-md);
+        font-weight: 500;
+      }
+
+      .flash.success {
+        background: var(--color-success-light);
+        color: var(--color-success);
+        border-left: 5px solid var(--color-success);
+      }
+
+      .flash.error {
+        background: var(--color-danger-light);
+        color: var(--color-danger);
+        border-left: 5px solid var(--color-danger);
+      }
+
+      .card {
+        background: var(--color-surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: 48px;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 20px 38px;
+        background: var(--color-primary);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: var(--font-size-md);
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition:
+          background 0.2s,
+          transform 0.1s;
+        text-align: center;
+      }
+
+      .btn:hover {
+        background: var(--color-primary-hover);
+      }
+
+      .btn:active {
+        transform: translateY(1px);
+      }
+
+      .btn-secondary {
+        background: var(--color-surface-alt);
+        color: var(--color-text);
+        border: 1px solid var(--color-border-strong);
+      }
+
+      .btn-secondary:hover {
+        background: var(--color-border);
+      }
+
+      .btn-danger {
+        background: var(--color-danger);
+      }
+
+      .btn-danger:hover {
+        background: #9b2c2c;
+      }
+
+      .btn-success {
+        background: var(--color-success);
+      }
+
+      .btn-success:hover {
+        background: #22543d;
+      }
+
+      .btn-sm {
+        padding: 14px 22px;
+        font-size: 18px;
+      }
+
+      .form-group {
+        margin-bottom: 30px;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: var(--font-size-md);
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--color-text);
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 20px 24px;
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-md);
+        font-size: var(--font-size-base);
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        background: var(--color-surface);
+        color: var(--color-text);
+      }
+
+      .form-group input:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(40, 94, 97, 0.12);
+      }
+
+      .password-wrapper {
+        position: relative;
+      }
+
+      .password-wrapper input {
+        padding-right: 120px;
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: var(--color-primary);
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 10px 16px;
+        border-radius: var(--radius-sm);
+        transition: background 0.2s;
+      }
+
+      .toggle-password:hover {
+        background: var(--color-primary-light);
+      }
+
+      .auth-wrapper {
+        width: 100%;
+      }
+
+      .auth-wrapper h1 {
+        font-size: var(--font-size-2xl);
+        color: var(--color-primary);
+        margin-bottom: 14px;
+        text-align: center;
+        letter-spacing: -0.5px;
+      }
+
+      .auth-wrapper .subtitle {
+        text-align: center;
+        font-size: var(--font-size-md);
+        color: var(--color-text-muted);
+        margin-bottom: 46px;
+      }
+
+      .auth-wrapper .form-footer {
+        text-align: center;
+        font-size: var(--font-size-sm);
+        color: var(--color-text-muted);
+        margin-top: 32px;
+      }
+
+      .auth-wrapper .form-footer a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .auth-wrapper .form-footer a:hover {
+        text-decoration: underline;
+      }
+
+      .auth-wrapper .btn {
+        width: 100%;
+        margin-top: 18px;
+        padding: 22px;
+        font-size: var(--font-size-md);
+      }
+
+      .footer {
+        background: var(--color-surface);
+        text-align: center;
+        padding: 36px;
+        color: var(--color-text-muted);
+        font-size: var(--font-size-sm);
+        border-radius: var(--radius-lg);
+        margin-top: 44px;
+        line-height: 1.7;
+      }
+
+      .footer strong {
+        color: var(--color-text);
+      }
+
+      /* ====================================================
+           TABLET (max-width: 900px)
+           ==================================================== */
+      @media (max-width: 900px) {
+        :root {
+          --font-size-base: 20px;
+          --font-size-sm: 17px;
+          --font-size-md: 19px;
+          --font-size-lg: 22px;
+          --font-size-xl: 26px;
+          --font-size-2xl: 30px;
+        }
+
+        .mobile-header {
+          display: flex;
+        }
+
+        .sidebar {
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+          top: 0;
+          width: 320px;
+          max-width: 90vw;
+          z-index: 300;
+        }
+
+        .sidebar.open {
+          transform: translateX(0);
+        }
+
+        .sidebar-header {
+          display: none;
+        }
+
+        .sidebar-nav {
+          padding-top: 100px;
+        }
+
+        .sidebar-link {
+          font-size: 19px;
+          padding: 16px 18px;
+        }
+
+        .sidebar-logout {
+          font-size: 19px;
+          padding: 18px 20px;
+        }
+
+        .content-user {
+          display: none;
+        }
+
+        .main-content {
+          margin-left: 0;
+          padding-top: 68px;
+        }
+
+        .container {
+          padding: 24px 20px;
+        }
+
+        .card {
+          padding: 28px 22px;
+        }
+      }
+
+      /* ====================================================
+           MOBILE (max-width: 600px)
+           ==================================================== */
+      @media (max-width: 600px) {
+        :root {
+          --font-size-base: 16px;
+          --font-size-sm: 14px;
+          --font-size-md: 16px;
+          --font-size-lg: 18px;
+          --font-size-xl: 20px;
+          --font-size-2xl: 24px;
+        }
+
+        .container {
+          padding: 16px 12px;
+        }
+
+        .card {
+          padding: 20px 16px;
+          border-radius: var(--radius-md);
+        }
+
+        .mobile-header {
+          padding: 12px 14px;
+        }
+
+        .mobile-brand {
+          font-size: 15px;
+        }
+
+        .mobile-brand .brand-icon {
+          width: 32px;
+          height: 32px;
+          font-size: 15px;
+        }
+
+        .burger-btn {
+          font-size: 24px;
+          padding: 4px 10px;
+        }
+
+        .sidebar-link {
+          font-size: 16px;
+          padding: 14px 16px;
+          gap: 12px;
+        }
+
+        .sidebar-icon {
+          width: 24px;
+          font-size: 20px;
+        }
+
+        .sidebar-logout {
+          font-size: 16px;
+          padding: 14px 16px;
+        }
+
+        .btn {
+          padding: 12px 18px;
+          font-size: 15px;
+        }
+
+        .btn-sm {
+          padding: 8px 12px;
+          font-size: 13px;
+        }
+
+        .form-group {
+          margin-bottom: 20px;
+        }
+
+        .form-group label {
+          font-size: 15px;
+          margin-bottom: 8px;
+        }
+
+        .form-group input {
+          padding: 14px 16px;
+          font-size: 17px;
+        }
+
+        .password-wrapper input {
+          padding-right: 90px;
+        }
+
+        .toggle-password {
+          font-size: 14px;
+          padding: 6px 12px;
+          right: 10px;
+        }
+
+        .auth-wrapper h1 {
+          font-size: 24px;
+        }
+
+        .auth-wrapper .subtitle {
+          font-size: 15px;
+          margin-bottom: 30px;
+        }
+
+        .auth-wrapper .btn {
+          padding: 16px;
+          font-size: 16px;
+        }
+
+        .footer {
+          padding: 24px 18px;
+          font-size: 14px;
+          margin-top: 28px;
+        }
+
+        .flash {
+          padding: 14px 18px;
+          font-size: 15px;
+        }
+      }
+    </style>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/print.css') }}"
+      media="print"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/toast.css') }}"
+    />
+
+    {% block extra_css %}{% endblock %}
+  </head>
+
+  <body>
+    {% if current_user.is_authenticated %}
+
+    <header class="mobile-header">
+      <div class="mobile-brand">
+        <span class="brand-icon">₱</span>
+        <span>Tax Computational Tool</span>
+      </div>
+      <button
+        type="button"
+        class="burger-btn"
+        id="burgerBtn"
+        aria-label="Open menu"
+      >
+        ☰
+      </button>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="appSidebar">
+        <div class="sidebar-header">
+          <a href="{{ url_for('main.index') }}" class="sidebar-brand">
+            <span class="brand-icon">₱</span>
+            <span class="brand-text">Tax Computational Tool</span>
+          </a>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="sidebar-section-label">Main</div>
+          <a
+            href="{{ url_for('main.index') }}"
+            class="sidebar-link {% if request.endpoint == 'main.index' %}active{% endif %}"
+          >
+            <span class="sidebar-icon">⌂</span>
+            <span>Compute</span>
+          </a>
+          <a
+            href="{{ url_for('main.history') }}"
+            class="sidebar-link {% if request.endpoint == 'main.history' %}active{% endif %}"
+          >
+            <span class="sidebar-icon">☰</span>
+            <span>History</span>
+          </a>
+        </nav>
+        <div class="sidebar-footer">
+          <a href="{{ url_for('auth.logout') }}" class="sidebar-logout"
+            >Logout</a
+          >
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <div class="content-user">
+          <div class="user-details">
+            <div class="user-name">{{ current_user.full_name }}</div>
+            <div class="user-email">{{ current_user.email }}</div>
+          </div>
+          <span class="user-avatar">{{ current_user.full_name[0]|upper }}</span>
+        </div>
+
+        <div class="container">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %} {% endif %} {% endwith %} {% block authenticated_content
+          %}{% endblock %}
+
+          <div class="footer">
+            Automatic Computation - Tax Computational Tool
+            <br />
+            Reminder: Please make sure that all information and amounts entered
+            into this system are backed by proper documents such as invoices,
+            applicable BIR forms, and other required attachments.
+            <br /><br />
+            <strong
+              >Project by: Ella Mae A. Deriquito &amp; Karylle M. Diaz</strong
+            >
+          </div>
+        </div>
+      </main>
+    </div>
+
+    {% else %}
+    <div class="public-layout">
+      <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %} {% endif %} {% endwith %} {% block public_content %}{%
+        endblock %}
+      </div>
+    </div>
+    {% endif %}
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .querySelectorAll(".toggle-password")
+          .forEach(function (button) {
+            button.addEventListener("click", function () {
+              const targetId = this.dataset.target;
+              const input = document.getElementById(targetId);
+              if (!input) return;
+              if (input.type === "password") {
+                input.type = "text";
+                this.textContent = "Hide";
+              } else {
+                input.type = "password";
+                this.textContent = "Show";
+              }
+            });
+          });
+
+        const burgerBtn = document.getElementById("burgerBtn");
+        const sidebar = document.getElementById("appSidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+
+        function openSidebar() {
+          if (sidebar) sidebar.classList.add("open");
+          if (overlay) overlay.classList.add("active");
+        }
+
+        function closeSidebar() {
+          if (sidebar) sidebar.classList.remove("open");
+          if (overlay) overlay.classList.remove("active");
+        }
+
+        if (burgerBtn) {
+          burgerBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (sidebar && sidebar.classList.contains("open")) {
+              closeSidebar();
+            } else {
+              openSidebar();
+            }
+          });
+        }
+
+        if (overlay) {
+          overlay.addEventListener("click", closeSidebar);
+        }
+      });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

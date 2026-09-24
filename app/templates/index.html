@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% block title %}Calculator - Tax Computational Tool{%
+endblock %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/calculator.css') }}"
+/>
+{% endblock %} {% block authenticated_content %}
+
+<div class="card" style="padding: 0">
+  {% include "partials/_wizard_nav.html" %}
+
+  <div class="wizard-content">
+    {% include "partials/_taxpayer_type.html" %} {% include
+    "partials/_compensation.html" %} {% include "partials/_business_income.html"
+    %} {% include "partials/_itemized_deductions.html" %} {% include
+    "partials/_results.html" %}
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script
+  type="module"
+  src="{{ url_for('static', filename='js/main.js') }}"
+></script>
+{% endblock %}

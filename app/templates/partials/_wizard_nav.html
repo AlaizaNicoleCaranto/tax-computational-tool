@@ -1,0 +1,44 @@
+{# ============================================================ PARTIAL: WIZARD
+PROGRESS NAVIGATION ============================================================
+Displays the four step indicators at the top of the calculator. The active step
+is highlighted by the wizard JavaScript module. Each step label is a button that
+lets the user jump directly to that step.
+============================================================ #}
+
+<div class="wizard-nav">
+  <button type="button" class="wizard-step-btn active" data-step="1">
+    <span class="wizard-step-number">1</span>
+    <span class="wizard-step-label">Type</span>
+  </button>
+
+  <div class="wizard-connector"></div>
+
+  <button type="button" class="wizard-step-btn" data-step="2">
+    <span class="wizard-step-number">2</span>
+    <span class="wizard-step-label">Income</span>
+  </button>
+
+  <div class="wizard-connector"></div>
+
+  <button type="button" class="wizard-step-btn" data-step="3">
+    <span class="wizard-step-number">3</span>
+    <span class="wizard-step-label">Deductions</span>
+  </button>
+
+  <div class="wizard-connector"></div>
+
+  <button type="button" class="wizard-step-btn" data-step="4">
+    <span class="wizard-step-number">4</span>
+    <span class="wizard-step-label">Results</span>
+  </button>
+</div>
+
+{# Navigation buttons for the current step. #}
+<div class="wizard-actions">
+  <button type="button" class="btn btn-secondary" data-action="wizard-back">
+    &larr; Back
+  </button>
+  <button type="button" class="btn" data-action="wizard-next">
+    Next &rarr;
+  </button>
+</div>

@@ -1,0 +1,432 @@
+{% extends "base.html" %} {% block title %}Computation #{{ computation.id }} -
+Tax Computational Tool{% endblock %} {% block extra_css %}
+<style>
+  .view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .view-header h1 {
+    font-size: var(--font-size-xl);
+    color: var(--color-primary);
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  .view-header .meta {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+
+  .view-header .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .scheme-block {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: 18px;
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  .scheme-block-header {
+    background: var(--color-primary);
+    color: #fff;
+    padding: 14px 20px;
+    font-size: var(--font-size-md);
+    font-weight: 700;
+  }
+
+  .scheme-block.is-best .scheme-block-header {
+    background: var(--color-success);
+  }
+
+  .scheme-block-body {
+    padding: 0 20px;
+  }
+
+  .scheme-block.is-best {
+    border-color: var(--color-success);
+    box-shadow: 0 0 0 2px rgba(47, 133, 90, 0.12);
+  }
+
+  .compute-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: var(--font-size-md);
+  }
+
+  .compute-row:last-child {
+    border-bottom: none;
+  }
+
+  .compute-row .amount {
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .compute-row.total {
+    margin: 10px -20px;
+    padding: 16px 20px;
+    background: var(--color-primary-light);
+    border: none;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .scheme-block.is-best .compute-row.total {
+    background: var(--color-success-light);
+    color: var(--color-success);
+  }
+
+  .vat-warning {
+    background: var(--color-warning-light);
+    border-left: 4px solid var(--color-warning);
+    color: var(--color-warning);
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    margin: 12px 0;
+    line-height: 1.5;
+  }
+
+  .recommendation {
+    background: var(--color-success-light);
+    border-left: 5px solid var(--color-success);
+    padding: 20px 24px;
+    border-radius: var(--radius-md);
+    margin-top: 24px;
+  }
+
+  .recommendation h3 {
+    font-size: var(--font-size-lg);
+    color: var(--color-success);
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .recommendation .best-scheme {
+    font-weight: 700;
+    color: var(--color-success);
+    font-size: var(--font-size-md);
+  }
+
+  .recommendation .best-tax {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-success);
+    margin-top: 6px;
+  }
+
+  .recommendation .note {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-top: 14px;
+    line-height: 1.6;
+  }
+</style>
+{% endblock %} {% block authenticated_content %}
+
+<div class="view-header">
+  <div>
+    <h1>Computation #{{ computation.id }}</h1>
+    <div class="meta">
+      Saved on {{ computation.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+    </div>
+  </div>
+  <div class="actions">
+    <a
+      href="{{ url_for('exports.export_pdf', computation_id=computation.id) }}"
+      class="btn btn-success"
+      >Download PDF</a
+    >
+    <a
+      href="{{ url_for('exports.export_csv', computation_id=computation.id) }}"
+      class="btn btn-secondary"
+      >Download CSV</a
+    >
+    <button type="button" class="btn btn-secondary" onclick="window.print()">
+      Print
+    </button>
+    <a href="{{ url_for('main.history') }}" class="btn">Back to History</a>
+  </div>
+</div>
+
+{% set osd = computation.results.osd %}
+<div
+  class="scheme-block {% if computation.best_scheme == osd.scheme %}is-best{% endif %}"
+>
+  <div class="scheme-block-header">Scheme 1: {{ osd.scheme }}</div>
+  <div class="scheme-block-body">
+    {% if osd.compensation %}
+    <div class="compute-row">
+      <span>Gross Compensation Income</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(osd.compensation.gross) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Non-Taxable Compensation</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(osd.compensation.exempt) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Taxable Compensation</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(osd.compensation.taxable) }}</span
+      >
+    </div>
+    {% endif %}
+    <div class="compute-row">
+      <span>Sales / Receipts</span
+      ><span class="amount">PHP {{ '{:,.2f}'.format(osd.sales) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>OSD ({{ '{:.2f}'.format(osd.osd_percentage) }}%)</span
+      ><span class="amount">PHP {{ '{:,.2f}'.format(osd.osd_amount) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>Net Income</span
+      ><span class="amount">PHP {{ '{:,.2f}'.format(osd.net_income) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>Other Non-Operating Income</span
+      ><span class="amount">PHP {{ '{:,.2f}'.format(osd.other_income) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>Total Taxable Income</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(osd.total_taxable_income) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Income Tax Due</span
+      ><span class="amount">PHP {{ '{:,.2f}'.format(osd.income_tax) }}</span>
+    </div>
+    <div class="compute-row">
+      <span
+        >Percentage Tax ({{ '{:.2f}'.format(osd.percentage_tax_rate) }}%)</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(osd.percentage_tax) }}</span
+      >
+    </div>
+    <div class="compute-row total">
+      <span>TOTAL TAX DUE</span
+      ><span class="amount">PHP {{ '{:,.2f}'.format(osd.total_tax) }}</span>
+    </div>
+  </div>
+</div>
+
+{% set itemized = computation.results.itemized %}
+<div
+  class="scheme-block {% if computation.best_scheme == itemized.scheme %}is-best{% endif %}"
+>
+  <div class="scheme-block-header">Scheme 2: {{ itemized.scheme }}</div>
+  <div class="scheme-block-body">
+    {% if itemized.compensation %}
+    <div class="compute-row">
+      <span>Gross Compensation Income</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.compensation.gross) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Non-Taxable Compensation</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.compensation.exempt) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Taxable Compensation</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.compensation.taxable) }}</span
+      >
+    </div>
+    {% endif %}
+    <div class="compute-row">
+      <span>Sales / Receipts</span
+      ><span class="amount">PHP {{ '{:,.2f}'.format(itemized.sales) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>Cost of Sales / Services</span
+      ><span class="amount">PHP {{ '{:,.2f}'.format(itemized.cost) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>Gross Income from Operation</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.gross_operation) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Ordinary Allowable Deductions</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.ordinary_deductions) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Special Allowable Deductions</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.special_deductions) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>NOLCO Applied</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.nolco_applied) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Total Allowable Deductions</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.total_deductions) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Net Income</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.net_income) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Other Non-Operating Income</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.other_income) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Total Taxable Income</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.total_taxable_income) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Income Tax Due</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.income_tax) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span
+        >Percentage Tax ({{ '{:.2f}'.format(itemized.percentage_tax_rate)
+        }}%)</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.percentage_tax) }}</span
+      >
+    </div>
+    <div class="compute-row total">
+      <span>TOTAL TAX DUE</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(itemized.total_tax) }}</span
+      >
+    </div>
+  </div>
+</div>
+
+{% set eight = computation.results.eight %}
+<div
+  class="scheme-block {% if computation.best_scheme == eight.scheme %}is-best{% endif %}"
+>
+  <div class="scheme-block-header">Scheme 3: {{ eight.scheme }}</div>
+  <div class="scheme-block-body">
+    {% if eight.compensation %}
+    <div class="compute-row">
+      <span>Gross Compensation Income</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(eight.compensation.gross) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Non-Taxable Compensation</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(eight.compensation.exempt) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Taxable Compensation</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(eight.compensation.taxable) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Compensation Tax Due</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(eight.compensation_tax) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Gross Business Income</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(eight.gross_income) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Business Tax ({{ '{:.2f}'.format(eight.flat_rate) }}%)</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(eight.business_tax) }}</span
+      >
+    </div>
+    {% else %}
+    <div class="compute-row">
+      <span>Gross Income</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(eight.gross_income) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Standard Deduction</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(eight.standard_deduction) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Taxable Income</span
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(eight.taxable_income) }}</span
+      >
+    </div>
+    <div class="compute-row">
+      <span>Tax Rate ({{ '{:.2f}'.format(eight.flat_rate) }}%)</span
+      ><span class="amount"></span>
+    </div>
+    {% endif %} {% if eight.vat_warning %}
+    <div class="vat-warning">
+      Warning: Gross income exceeds PHP 3,000,000. The 8% option is not
+      available to VAT-registered taxpayers or those exceeding the VAT
+      threshold. Please verify eligibility with the BIR.
+    </div>
+    {% endif %}
+    <div class="compute-row total">
+      <span>TOTAL TAX DUE</span
+      ><span class="amount">PHP {{ '{:,.2f}'.format(eight.total_tax) }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="recommendation">
+  <h3>Recommended Scheme</h3>
+  <div class="best-scheme">{{ computation.best_scheme }}</div>
+  <div class="best-tax">
+    PHP {{ '{:,.2f}'.format(computation.best_tax or 0) }}
+  </div>
+  <div class="note">
+    This recommendation is based on a mathematical comparison of the three
+    schemes using the figures you entered. Actual eligibility, tax option
+    requirements, documentation, and applicable BIR rules must still be
+    verified.
+  </div>
+</div>
+
+{% endblock %}

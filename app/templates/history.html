@@ -1,0 +1,172 @@
+{% extends "base.html" %} {% block title %}History - Tax Computational Tool{%
+endblock %} {% block extra_css %}
+<style>
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .history-header h1 {
+    font-size: var(--font-size-xl);
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 14px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .history-table th {
+    background: var(--color-surface-alt);
+    color: var(--color-primary);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .history-table tbody tr:hover {
+    background: var(--color-primary-lighter);
+  }
+
+  .history-table .amount {
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .history-table .actions {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .history-table .actions a,
+  .history-table .actions button {
+    margin-left: 4px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--color-text-muted);
+  }
+
+  .empty-state h2 {
+    font-size: var(--font-size-lg);
+    margin-bottom: 10px;
+    color: var(--color-text);
+  }
+
+  .empty-state p {
+    font-size: var(--font-size-md);
+    margin-bottom: 24px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-pure {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+  .badge-mixed {
+    background: var(--color-warning-light);
+    color: var(--color-warning);
+  }
+</style>
+{% endblock %} {% block authenticated_content %}
+
+<div class="card">
+  <div class="history-header">
+    <h1>Your Computation History</h1>
+    <a href="{{ url_for('main.index') }}" class="btn">+ New Computation</a>
+  </div>
+
+  {% if computations %}
+  <div style="overflow-x: auto">
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Classification</th>
+          <th>Best Scheme</th>
+          <th class="amount">Total Tax</th>
+          <th class="actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for computation in computations %}
+        <tr>
+          <td>{{ computation.created_at.strftime('%b %d, %Y %I:%M %p') }}</td>
+          <td>
+            {% if computation.taxpayer_type == 'pure' %}
+            <span class="badge badge-pure">Purely Business</span>
+            {% else %}
+            <span class="badge badge-mixed">Mixed Income</span>
+            {% endif %}
+          </td>
+          <td>{{ computation.best_scheme }}</td>
+          <td class="amount">
+            PHP {{ '{:,.2f}'.format(computation.best_tax or 0) }}
+          </td>
+          <td class="actions">
+            <a
+              href="{{ url_for('main.view', computation_id=computation.id) }}"
+              class="btn btn-sm"
+            >
+              View
+            </a>
+            <a
+              href="{{ url_for('exports.export_pdf', computation_id=computation.id) }}"
+              class="btn btn-sm btn-success"
+            >
+              PDF
+            </a>
+            <form
+              method="POST"
+              action="{{ url_for('main.delete', computation_id=computation.id) }}"
+              style="display: inline"
+              onsubmit="return confirm('Delete this computation?');"
+            >
+              <button type="submit" class="btn btn-sm btn-danger">
+                Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <h2>No computations yet</h2>
+    <p>
+      You haven't saved any tax computations. Start by entering your income and
+      deductions.
+    </p>
+    <a href="{{ url_for('main.index') }}" class="btn">Start Computing</a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
