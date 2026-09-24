@@ -7,7 +7,7 @@
     align-items: center;
     justify-content: center;
     gap: 0;
-    padding: 44px 40px;
+    padding: 28px 24px;
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
     flex-wrap: wrap;
@@ -17,11 +17,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 14px 26px;
+    padding: 8px 16px;
     border-radius: var(--radius-md);
     transition: background 0.2s;
     font-family: inherit;
@@ -35,19 +35,19 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 62px;
-    height: 62px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     background: var(--color-surface-alt);
     color: var(--color-text-muted);
-    font-size: 26px;
+    font-size: 17px;
     font-weight: 700;
     border: 2px solid var(--color-border-strong);
     transition: all 0.2s;
 }
 
 .wizard-step-label {
-    font-size: 21px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--color-text-muted);
     transition: color 0.2s;
@@ -76,10 +76,10 @@
 }
 
 .wizard-connector {
-    width: 110px;
+    width: 60px;
     height: 2px;
     background: var(--color-border-strong);
-    margin: 0 12px;
+    margin: 0 6px;
 }
 
 .wizard-step-btn.completed+.wizard-connector,
@@ -116,14 +116,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 18px;
-    padding: 34px 40px;
+    gap: 12px;
+    padding: 20px 24px;
     border-top: 1px solid var(--color-border);
     background: var(--color-surface-alt);
 }
 
 .wizard-actions .btn {
-    min-width: 190px;
+    min-width: 120px;
 }
 
 .wizard-actions .btn[disabled] {
@@ -136,7 +136,7 @@
 }
 
 .section {
-    padding: 48px;
+    padding: 28px;
     border-bottom: 1px solid var(--color-border);
 }
 
@@ -145,23 +145,23 @@
 }
 
 .section-title {
-    font-size: 38px;
+    font-size: 22px;
     font-weight: 700;
     color: var(--color-primary);
-    margin-bottom: 36px;
-    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+    letter-spacing: -0.3px;
 }
 
 .taxpayer-options {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 26px;
+    gap: 16px;
 }
 
 .taxpayer-option {
     border: 2px solid var(--color-border-strong);
     border-radius: var(--radius-md);
-    padding: 30px;
+    padding: 18px;
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s;
 }
@@ -172,20 +172,20 @@
 }
 
 .taxpayer-option input {
-    margin-right: 18px;
-    transform: scale(1.6);
+    margin-right: 10px;
+    transform: scale(1.3);
     accent-color: var(--color-primary);
 }
 
 .taxpayer-option strong {
-    font-size: 24px;
+    font-size: 15px;
     color: var(--color-text);
 }
 
 .option-description {
-    margin-top: 16px;
-    padding-left: 42px;
-    font-size: 21px;
+    margin-top: 8px;
+    padding-left: 26px;
+    font-size: 13px;
     color: var(--color-text-muted);
     line-height: 1.5;
 }
@@ -193,7 +193,7 @@
 .input-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 34px;
+    gap: 20px;
 }
 
 .input-group {
@@ -202,9 +202,9 @@
 
 .input-group label {
     display: block;
-    font-size: 23px;
+    font-size: 15px;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
     color: var(--color-text);
 }
 
@@ -214,22 +214,22 @@
 
 .input-box span.prefix {
     position: absolute;
-    left: 22px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--color-text-muted);
     font-weight: 600;
-    font-size: 22px;
+    font-size: 14px;
     pointer-events: none;
 }
 
 .input-box input {
     width: 100%;
-    padding: 22px 24px 22px 78px;
+    padding: 12px 14px 12px 50px;
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-md);
     outline: none;
-    font-size: 26px;
+    font-size: 16px;
     color: var(--color-text);
     background: var(--color-surface);
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -243,9 +243,9 @@
 .info-box {
     background: var(--color-primary-lighter);
     border-left: 4px solid var(--color-primary);
-    padding: 24px 30px;
+    padding: 14px 18px;
     border-radius: var(--radius-sm);
-    font-size: 22px;
+    font-size: 13px;
     color: var(--color-text);
     line-height: 1.6;
 }
@@ -253,23 +253,23 @@
 .dynamic-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 12px;
 }
 
 .dynamic-row {
     display: grid;
-    grid-template-columns: 1fr 280px 62px;
-    gap: 20px;
+    grid-template-columns: 1fr 180px 44px;
+    gap: 12px;
     align-items: center;
 }
 
 .dynamic-row>input[type="text"] {
     width: 100%;
-    padding: 22px 24px;
+    padding: 12px 14px;
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-md);
     outline: none;
-    font-size: 23px;
+    font-size: 14px;
     color: var(--color-text);
 }
 
@@ -282,11 +282,11 @@
     border: none;
     background: var(--color-danger-light);
     color: var(--color-danger);
-    width: 62px;
-    height: 62px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 30px;
+    font-size: 22px;
     font-weight: bold;
     transition: background 0.2s;
 }
@@ -296,15 +296,15 @@
 }
 
 .add-btn {
-    margin-top: 24px;
+    margin-top: 16px;
     border: none;
     background: var(--color-primary);
     color: #fff;
     border-radius: var(--radius-md);
-    padding: 20px 30px;
+    padding: 12px 20px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 22px;
+    font-size: 14px;
     transition: background 0.2s;
 }
 
@@ -313,7 +313,7 @@
 }
 
 .itemized-panel {
-    margin-top: 40px;
+    margin-top: 22px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     overflow: hidden;
@@ -321,29 +321,29 @@
 
 .itemized-header {
     background: var(--color-primary-lighter);
-    padding: 26px 32px;
+    padding: 14px 18px;
     font-weight: 700;
     color: var(--color-primary);
-    font-size: 24px;
+    font-size: 15px;
     border-bottom: 1px solid var(--color-border);
 }
 
 .deduction-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px 40px;
-    padding: 34px;
+    gap: 12px 24px;
+    padding: 20px;
 }
 
 .deduction-row {
     display: grid;
-    grid-template-columns: 1fr 220px;
-    gap: 20px;
+    grid-template-columns: 1fr 140px;
+    gap: 12px;
     align-items: center;
 }
 
 .deduction-row label {
-    font-size: 21px;
+    font-size: 14px;
     margin: 0;
     color: var(--color-text);
     line-height: 1.5;
@@ -351,10 +351,10 @@
 
 .deduction-row input {
     width: 100%;
-    padding: 20px 22px;
+    padding: 10px 12px;
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-sm);
-    font-size: 23px;
+    font-size: 14px;
     text-align: right;
     outline: none;
     color: var(--color-text);
@@ -366,8 +366,8 @@
 }
 
 .total-display {
-    margin-top: 28px;
-    padding: 26px 30px;
+    margin-top: 18px;
+    padding: 14px 18px;
     background: var(--color-primary-lighter);
     border-radius: var(--radius-md);
     display: flex;
@@ -375,25 +375,25 @@
     align-items: center;
     font-weight: 700;
     color: var(--color-primary);
-    font-size: 24px;
+    font-size: 15px;
 }
 
 .nolco-table-container {
     width: 100%;
     overflow-x: auto;
-    margin-top: 24px;
+    margin-top: 16px;
 }
 
 .nolco-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 21px;
+    font-size: 13px;
 }
 
 .nolco-table th,
 .nolco-table td {
     border: 1px solid var(--color-border-strong);
-    padding: 20px 22px;
+    padding: 12px 14px;
     text-align: center;
 }
 
@@ -401,15 +401,15 @@
     background: var(--color-primary-lighter);
     color: var(--color-primary);
     font-weight: 700;
-    font-size: 21px;
+    font-size: 13px;
 }
 
 .nolco-table input[type="text"] {
     width: 100%;
-    padding: 16px 18px;
+    padding: 8px 10px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    font-size: 22px;
+    font-size: 13px;
     text-align: right;
     outline: none;
     color: var(--color-text);
@@ -427,17 +427,17 @@
     background: var(--color-primary-light);
     font-weight: 700;
     color: var(--color-primary);
-    font-size: 22px;
+    font-size: 14px;
 }
 
 .scheme-section {
-    padding: 48px;
+    padding: 28px;
 }
 
 .scheme-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 34px;
+    gap: 20px;
 }
 
 .scheme-card {
@@ -458,8 +458,8 @@
 .scheme-card-header {
     background: var(--color-primary);
     color: #fff;
-    padding: 28px 30px;
-    min-height: 130px;
+    padding: 18px 20px;
+    min-height: 90px;
 }
 
 .scheme-card.is-best .scheme-card-header {
@@ -467,19 +467,19 @@
 }
 
 .scheme-card-header h3 {
-    font-size: 24px;
+    font-size: 15px;
     line-height: 1.4;
     font-weight: 700;
 }
 
 .scheme-card-header p {
-    margin-top: 10px;
-    font-size: 20px;
+    margin-top: 6px;
+    font-size: 13px;
     opacity: 0.9;
 }
 
 .scheme-body {
-    padding: 30px;
+    padding: 20px;
     flex: 1;
 }
 
@@ -487,10 +487,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
-    padding: 18px 0;
+    gap: 12px;
+    padding: 10px 0;
     border-bottom: 1px solid var(--color-border);
-    font-size: 22px;
+    font-size: 14px;
     color: var(--color-text);
 }
 
@@ -506,19 +506,19 @@
 
 .compute-row.subtotal {
     background: var(--color-surface-alt);
-    margin: 10px -16px;
-    padding: 20px 16px;
+    margin: 6px -10px;
+    padding: 12px 10px;
     border-radius: var(--radius-sm);
     font-weight: 600;
 }
 
 .compute-row.total {
-    margin-top: 22px;
-    padding: 26px 24px;
+    margin-top: 14px;
+    padding: 16px 14px;
     background: var(--color-primary-light);
     border-radius: var(--radius-md);
     border: none;
-    font-size: 26px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--color-primary);
 }
@@ -532,23 +532,23 @@
     background: var(--color-warning-light);
     border-left: 3px solid var(--color-warning);
     color: var(--color-warning);
-    padding: 20px 24px;
+    padding: 12px 14px;
     border-radius: var(--radius-sm);
-    font-size: 20px;
-    margin: 20px 0;
+    font-size: 13px;
+    margin: 12px 0;
     line-height: 1.5;
 }
 
 .recommendation-section {
-    padding: 0 48px 48px;
+    padding: 0 28px 28px;
 }
 
 .best-card {
     background: var(--color-success-light);
     border-left: 5px solid var(--color-success);
-    padding: 32px 38px;
+    padding: 20px 24px;
     border-radius: var(--radius-md);
-    font-size: 23px;
+    font-size: 15px;
     line-height: 1.7;
     color: var(--color-text);
 }
@@ -574,7 +574,7 @@
 
 @media (max-width: 900px) {
     .wizard-connector {
-        width: 40px;
+        width: 30px;
     }
 }
 
@@ -592,185 +592,185 @@
 
     .section,
     .scheme-section {
-        padding: 22px 18px;
+        padding: 18px 14px;
     }
 
     .section-title {
-        font-size: 22px;
-        margin-bottom: 18px;
+        font-size: 19px;
+        margin-bottom: 14px;
     }
 
     .wizard-nav {
-        padding: 18px 10px;
+        padding: 14px 8px;
         gap: 0;
     }
 
     .wizard-connector {
-        width: 14px;
-        margin: 0 4px;
+        width: 12px;
+        margin: 0 3px;
     }
 
     .wizard-step-label {
-        font-size: 12px;
+        font-size: 11px;
     }
 
     .wizard-step-number {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
     }
 
     .wizard-step-btn {
-        padding: 8px 6px;
-        gap: 5px;
+        padding: 6px 5px;
+        gap: 4px;
     }
 
     .wizard-actions {
-        padding: 20px 18px;
+        padding: 14px 12px;
     }
 
     .wizard-actions .btn {
-        min-width: 110px;
+        min-width: 100px;
     }
 
     .recommendation-section {
-        padding: 0 18px 24px;
+        padding: 0 14px 18px;
     }
 
     .best-card {
-        padding: 18px 20px;
-        font-size: 16px;
-    }
-
-    .compute-row {
-        font-size: 15px;
-        padding: 12px 0;
-    }
-
-    .compute-row.total {
-        font-size: 17px;
-        padding: 16px 14px;
-    }
-
-    .scheme-card-header {
-        padding: 18px 20px;
-        min-height: 90px;
-    }
-
-    .scheme-card-header h3 {
-        font-size: 16px;
-    }
-
-    .scheme-card-header p {
+        padding: 14px 16px;
         font-size: 13px;
     }
 
+    .compute-row {
+        font-size: 13px;
+        padding: 9px 0;
+    }
+
+    .compute-row.total {
+        font-size: 15px;
+        padding: 13px 11px;
+    }
+
+    .scheme-card-header {
+        padding: 14px 16px;
+        min-height: 72px;
+    }
+
+    .scheme-card-header h3 {
+        font-size: 13px;
+    }
+
+    .scheme-card-header p {
+        font-size: 11px;
+    }
+
     .scheme-body {
-        padding: 18px;
+        padding: 14px;
     }
 
     .taxpayer-option {
-        padding: 18px;
+        padding: 14px;
     }
 
     .taxpayer-option strong {
-        font-size: 17px;
+        font-size: 14px;
     }
 
     .option-description {
-        font-size: 14px;
-        padding-left: 30px;
-        margin-top: 8px;
+        font-size: 12px;
+        padding-left: 24px;
+        margin-top: 6px;
     }
 
     .input-group label {
-        font-size: 15px;
-        margin-bottom: 8px;
+        font-size: 13px;
+        margin-bottom: 6px;
     }
 
     .input-box input {
-        padding: 14px 16px 14px 56px;
-        font-size: 17px;
+        padding: 11px 12px 11px 44px;
+        font-size: 14px;
     }
 
     .input-box span.prefix {
-        font-size: 15px;
-        left: 16px;
+        font-size: 12px;
+        left: 12px;
     }
 
     .dynamic-row>input[type="text"] {
-        padding: 14px 16px;
-        font-size: 16px;
+        padding: 11px 12px;
+        font-size: 13px;
     }
 
     .remove-btn {
-        width: 46px;
-        height: 46px;
-        font-size: 22px;
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
     }
 
     .add-btn {
-        padding: 14px 22px;
-        font-size: 16px;
+        padding: 10px 16px;
+        font-size: 13px;
     }
 
     .itemized-header {
-        padding: 16px 20px;
-        font-size: 17px;
+        padding: 12px 14px;
+        font-size: 14px;
     }
 
     .deduction-grid {
-        padding: 20px;
-        gap: 12px 24px;
+        padding: 14px;
+        gap: 10px 18px;
     }
 
     .deduction-row {
-        grid-template-columns: 1fr 130px;
-        gap: 12px;
+        grid-template-columns: 1fr 100px;
+        gap: 10px;
     }
 
     .deduction-row label {
-        font-size: 14px;
+        font-size: 12px;
     }
 
     .deduction-row input {
-        padding: 12px 14px;
-        font-size: 16px;
+        padding: 9px 10px;
+        font-size: 13px;
     }
 
     .total-display {
-        padding: 16px 18px;
-        font-size: 16px;
-        margin-top: 20px;
+        padding: 12px 14px;
+        font-size: 14px;
+        margin-top: 14px;
     }
 
     .nolco-table {
-        font-size: 14px;
+        font-size: 12px;
     }
 
     .nolco-table th,
     .nolco-table td {
-        padding: 10px 8px;
-        font-size: 13px;
+        padding: 8px 6px;
+        font-size: 11px;
     }
 
     .nolco-table input[type="text"] {
-        padding: 8px 10px;
-        font-size: 14px;
+        padding: 7px 8px;
+        font-size: 12px;
     }
 
     .nolco-table tr.total-row td {
-        font-size: 15px;
+        font-size: 13px;
     }
 
     .vat-warning {
-        padding: 14px 16px;
-        font-size: 14px;
-        margin: 14px 0;
+        padding: 10px 12px;
+        font-size: 12px;
+        margin: 10px 0;
     }
 
     .info-box {
-        padding: 16px 18px;
-        font-size: 14px;
+        padding: 12px 14px;
+        font-size: 12px;
     }
 }
