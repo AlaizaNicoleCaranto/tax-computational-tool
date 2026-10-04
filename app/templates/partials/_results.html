@@ -73,15 +73,21 @@ SCHEME RESULTS (STEP 4)
         justify-content: flex-end;
       "
     >
+      {% if template_source_id %}
+      <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+        Start Blank
+      </a>
+      {% else %}
       <button type="button" class="btn btn-secondary" data-action="reset-form">
         Reset
       </button>
+      {% endif %}
       <button
         type="button"
         class="btn btn-success"
         data-action="save-computation"
       >
-        Save Computation
+        {% if template_source_id %}Save as New Computation{% else %}Save Computation{% endif %}
       </button>
     </div>
   </div>

@@ -75,7 +75,7 @@ def compute_osd(data):
     osd_percentage = safe_float(
         data.get("osd_percentage", DEFAULT_OSD_PERCENTAGE)
     )
-    if osd_percentage <= 0:
+    if osd_percentage < 0:
         osd_percentage = DEFAULT_OSD_PERCENTAGE
 
     # Apply the OSD to sales to get the deductible amount.
@@ -104,7 +104,7 @@ def compute_osd(data):
     percentage_rate = safe_float(
         data.get("percentage_tax_rate", DEFAULT_PERCENTAGE_TAX_RATE)
     )
-    if percentage_rate <= 0:
+    if percentage_rate < 0:
         percentage_rate = DEFAULT_PERCENTAGE_TAX_RATE
 
     # Percentage tax base is gross sales plus other income.
@@ -206,7 +206,7 @@ def compute_itemized(data):
     percentage_rate = safe_float(
         data.get("percentage_tax_rate", DEFAULT_PERCENTAGE_TAX_RATE)
     )
-    if percentage_rate <= 0:
+    if percentage_rate < 0:
         percentage_rate = DEFAULT_PERCENTAGE_TAX_RATE
 
     # Percentage tax base is gross sales plus other income.
@@ -293,13 +293,15 @@ def compute_eight_percent(data):
     standard_deduction = safe_float(
         data.get("standard_deduction", DEFAULT_STANDARD_DEDUCTION)
     )
-    if standard_deduction <= 0:
+    if standard_deduction < 0:
         standard_deduction = DEFAULT_STANDARD_DEDUCTION
 
     # Flat rate. Defaults to 8 percent.
     flat_rate = safe_float(data.get("flat_rate", DEFAULT_FLAT_RATE))
-    if flat_rate <= 0:
+    if flat_rate < 0:
         flat_rate = DEFAULT_FLAT_RATE
+
+    scheme_name = f"Optional Income Tax Rate ({flat_rate:g}%)"
 
     # VAT threshold check. Used only for the warning flag.
     exceeds_vat_threshold = gross_income > VAT_THRESHOLD
@@ -310,7 +312,7 @@ def compute_eight_percent(data):
         tax = taxable * (flat_rate / 100)
 
         return {
-            "scheme": "Optional Income Tax Rate (8%)",
+            "scheme": scheme_name,
             "is_mixed": False,
             "compensation": None,
             "sales": sales,
@@ -331,7 +333,7 @@ def compute_eight_percent(data):
     total_tax = compensation_tax + business_tax
 
     return {
-        "scheme": "Optional Income Tax Rate (8%)",
+        "scheme": scheme_name,
         "is_mixed": True,
         "compensation": compensation,
         "compensation_tax": compensation_tax,
@@ -371,8 +373,10 @@ def recommend_scheme(osd_result, itemized_result, eight_result):
     candidates = [
         (osd_result["scheme"], osd_result["total_tax"]),
         (itemized_result["scheme"], itemized_result["total_tax"]),
-        (eight_result["scheme"], eight_result["total_tax"]),
     ]
+
+    if not eight_result.get("vat_warning"):
+        candidates.append((eight_result["scheme"], eight_result["total_tax"]))
 
     # Pick the tuple with the smallest total tax.
     best_name, best_tax = min(candidates, key=lambda pair: pair[1])

@@ -10,6 +10,8 @@
 # support new input formats without touching the computation
 # code.
 
+import math
+
 
 def safe_float(value, default=0.0):
     """
@@ -37,7 +39,8 @@ def safe_float(value, default=0.0):
             .replace("PHP", "")
             .strip()
         )
-        return float(cleaned)
+        parsed = float(cleaned)
+        return parsed if math.isfinite(parsed) else default
     except (ValueError, TypeError):
         return default
 
@@ -121,7 +124,11 @@ def get_other_income(data):
 
     # New format: list of {title, amount} dictionaries
     if isinstance(items, list):
-        return sum(safe_float(item.get("amount", 0)) for item in items)
+        return sum(
+            safe_float(item.get("amount", 0))
+            for item in items
+            if isinstance(item, dict)
+        )
 
     # Legacy format: a single numeric value
     return safe_float(items)
@@ -180,7 +187,11 @@ def get_special_deductions(data):
     items = data.get("special_deductions", [])
 
     if isinstance(items, list):
-        return sum(safe_float(item.get("amount", 0)) for item in items)
+        return sum(
+            safe_float(item.get("amount", 0))
+            for item in items
+            if isinstance(item, dict)
+        )
 
     return 0.0
 
@@ -206,6 +217,15 @@ def get_nolco_applied(data):
 
     if isinstance(rows, list):
         for row in rows:
-            total += safe_float(row.get("d", 0))
+            if not isinstance(row, dict):
+                continue
+
+            available = max(
+                0.0,
+                safe_float(row.get("a", 0))
+                - safe_float(row.get("b", 0))
+                - safe_float(row.get("c", 0)),
+            )
+            total += min(safe_float(row.get("d", 0)), available)
 
     return total

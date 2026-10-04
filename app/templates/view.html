@@ -141,10 +141,13 @@ Tax Computational Tool{% endblock %} {% block extra_css %}
 
 <div class="view-header">
   <div>
-    <h1>Computation #{{ computation.id }}</h1>
+    <h1>{{ computation.inputs.get('computation_title', 'Untitled computation') }}</h1>
     <div class="meta">
-      Saved on {{ computation.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+      Computation #{{ computation.id }} · Saved on {{ computation.created_at.strftime('%B %d, %Y at %I:%M %p') }}
     </div>
+    {% if computation.inputs.get('computation_note') %}
+    <div class="meta">Note: {{ computation.inputs.get('computation_note') }}</div>
+    {% endif %}
   </div>
   <div class="actions">
     <a
@@ -156,6 +159,11 @@ Tax Computational Tool{% endblock %} {% block extra_css %}
       href="{{ url_for('exports.export_csv', computation_id=computation.id) }}"
       class="btn btn-secondary"
       >Download CSV</a
+    >
+    <a
+      href="{{ url_for('main.edit', computation_id=computation.id) }}"
+      class="btn btn-secondary"
+      >Use as Template/Edit</a
     >
     <button type="button" class="btn btn-secondary" onclick="window.print()">
       Print
@@ -403,7 +411,7 @@ Tax Computational Tool{% endblock %} {% block extra_css %}
     </div>
     {% endif %} {% if eight.vat_warning %}
     <div class="vat-warning">
-      Warning: Gross income exceeds PHP 3,000,000. The 8% option is not
+      Warning: Gross income exceeds PHP 3,000,000. This optional rate is not
       available to VAT-registered taxpayers or those exceeding the VAT
       threshold. Please verify eligibility with the BIR.
     </div>

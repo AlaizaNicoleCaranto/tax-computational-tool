@@ -143,6 +143,25 @@ function readString(id, fallback) {
 }
 
 /**
+ * Read an editable setting from the result cards.
+ */
+function readSetting(name, fallback) {
+    const element = document.querySelector(
+        '[data-setting="' + name + '"]'
+    );
+
+    if (!element || element.value.trim() === "") {
+        if (window.initialTaxFormState &&
+            window.initialTaxFormState[name] !== undefined) {
+            return parseNumber(window.initialTaxFormState[name]);
+        }
+        return fallback;
+    }
+
+    return parseNumber(element.value);
+}
+
+/**
  * Build the full request payload for /api/calculate.
  *
  * The shape matches what the backend expects. Optional
@@ -153,6 +172,11 @@ function readString(id, fallback) {
  */
 export function getFormState() {
     return {
+        computation_title: readString(
+            "computationTitle",
+            "Untitled computation"
+        ),
+        computation_note: readString("computationNote", ""),
         taxpayer_type: getTaxpayerType(),
 
         // Compensation (mixed income earners only)
@@ -171,6 +195,12 @@ export function getFormState() {
         // Itemized deductions
         ordinary_deductions: getOrdinaryDeductions(),
         special_deductions: getSpecialDeductions(),
-        nolco: getNolco()
+        nolco: getNolco(),
+
+        // Tax scheme settings editable from the results cards
+        osd_percentage: readSetting("osd_percentage", 40),
+        percentage_tax_rate: readSetting("percentage_tax_rate", 3),
+        standard_deduction: readSetting("standard_deduction", 250000),
+        flat_rate: readSetting("flat_rate", 8)
     };
 }

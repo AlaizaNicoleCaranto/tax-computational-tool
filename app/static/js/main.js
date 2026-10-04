@@ -81,6 +81,8 @@ const dom = {
    ============================================================ */
 
 function initialize() {
+    const initialState = window.initialTaxFormState || null;
+
     // 1. Attach the input formatter to every static numeric
     //    input so that thousand separators appear as the
     //    user types.
@@ -115,6 +117,10 @@ function initialize() {
     appendNolcoRow(dom.nolcoTableBody, handlers);
     appendNolcoRow(dom.nolcoTableBody, handlers);
 
+    if (initialState) {
+        applyInitialState(initialState, handlers);
+    }
+
     // 4. Compute the initial NOLCO schedule so that column
     //    E and the footer total are consistent with the
     //    empty rows that were just added.
@@ -124,6 +130,10 @@ function initialize() {
     //    module. This is the last step because it depends
     //    on the DOM being fully populated.
     attachEvents(dom);
+
+    if (initialState && dom.cashSales) {
+        dom.cashSales.dispatchEvent(new Event("input", { bubbles: true }));
+    }
 
     // 6. Run an initial cost display update so the cost
     //    summary is correct on first paint.
@@ -148,4 +158,80 @@ if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initialize);
 } else {
     initialize();
+}
+
+function setInputValue(id, value) {
+    const input = document.getElementById(id);
+    if (input && value !== undefined && value !== null) {
+        input.value = value;
+    }
+}
+
+function applyInitialState(initialState, handlers) {
+    const taxpayerType = initialState.taxpayer_type || "pure";
+    dom.taxpayerRadios.forEach(function (radio) {
+        radio.checked = radio.value === taxpayerType;
+    });
+
+    setInputValue("grossComp", initialState.gross_compensation);
+    setInputValue("computationTitle", initialState.computation_title);
+    setInputValue("computationNote", initialState.computation_note);
+    setInputValue("nonTaxComp", initialState.non_taxable_compensation);
+    setInputValue("cashSales", initialState.cash_sales);
+    setInputValue("accrualSales", initialState.accrual_sales);
+    setInputValue("cashCost", initialState.cash_cost);
+    setInputValue("accrualCost", initialState.accrual_cost);
+
+    document.querySelectorAll(".ordinary-deduction").forEach(function (input) {
+        const name = input.dataset.name;
+        if (name && initialState.ordinary_deductions) {
+            input.value = initialState.ordinary_deductions[name] || 0;
+        }
+    });
+
+    const otherIncome = Array.isArray(initialState.other_income)
+        ? initialState.other_income
+        : [];
+    dom.otherIncomeList.innerHTML = "";
+    otherIncome.forEach(function (item) {
+        appendOtherIncomeRow(
+            dom.otherIncomeList,
+            handlers,
+            item.title,
+            item.amount
+        );
+    });
+
+    const specialDeductions = Array.isArray(initialState.special_deductions)
+        ? initialState.special_deductions
+        : [];
+    dom.specialDeductions.innerHTML = "";
+    specialDeductions.forEach(function (item) {
+        appendSpecialDeductionRow(
+            dom.specialDeductions,
+            handlers,
+            item.title,
+            item.amount
+        );
+    });
+
+    const nolco = Array.isArray(initialState.nolco) ? initialState.nolco : [];
+    dom.nolcoTableBody.innerHTML = "";
+    const nolcoRows = Math.max(4, nolco.length);
+    for (let index = 0; index < nolcoRows; index += 1) {
+        appendNolcoRow(dom.nolcoTableBody, handlers);
+    }
+
+    dom.nolcoTableBody.querySelectorAll("tr").forEach(function (row, index) {
+        const savedRow = nolco[index];
+        if (!savedRow) {
+            return;
+        }
+
+        row.querySelector(".year-input").value = savedRow.year || "";
+        row.querySelector(".nolco-a").value = savedRow.a || 0;
+        row.querySelector(".nolco-b").value = savedRow.b || 0;
+        row.querySelector(".nolco-c").value = savedRow.c || 0;
+        row.querySelector(".nolco-d").value = savedRow.d || 0;
+    });
 }
