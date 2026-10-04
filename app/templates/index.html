@@ -6,6 +6,34 @@ endblock %} {% block extra_css %}
 />
 {% endblock %} {% block authenticated_content %}
 
+{% if template_source_id %}
+<div class="template-banner">
+  <strong>Editing a copy of Computation #{{ template_source_id }}</strong>
+  <span>The original computation will remain unchanged.</span>
+</div>
+{% endif %}
+
+<div class="calculation-meta">
+  <div>
+    <label for="computationTitle">Computation name</label>
+    <input
+      id="computationTitle"
+      type="text"
+      placeholder="Example: 2025 annual estimate"
+      maxlength="120"
+    />
+  </div>
+  <div>
+    <label for="computationNote">Notes</label>
+    <input
+      id="computationNote"
+      type="text"
+      placeholder="Optional note"
+      maxlength="250"
+    />
+  </div>
+</div>
+
 <div class="card" style="padding: 0">
   {% include "partials/_wizard_nav.html" %}
 
@@ -18,6 +46,10 @@ endblock %} {% block extra_css %}
 </div>
 
 {% endblock %} {% block extra_js %}
+<script>
+  window.initialTaxFormState = {{ initial_inputs|default(None)|tojson }};
+  window.templateSourceId = {{ template_source_id|default(None)|tojson }};
+</script>
 <script
   type="module"
   src="{{ url_for('static', filename='js/main.js') }}"

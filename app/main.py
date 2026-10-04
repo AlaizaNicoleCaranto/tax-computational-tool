@@ -48,6 +48,47 @@ def index():
     return render_template("index.html")
 
 
+@main_bp.route("/dashboard")
+@login_required
+def dashboard():
+    """Show a quick summary and recent computations."""
+    computations = (
+        Computation.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Computation.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "dashboard.html",
+        computations=computations[:5],
+        computation_count=len(computations),
+        lowest_tax=min(
+            (computation.best_tax or 0 for computation in computations),
+            default=0,
+        ),
+    )
+
+
+@main_bp.route("/edit/<int:computation_id>")
+@login_required
+def edit(computation_id):
+    """Open an owned computation as a new editable template."""
+    computation = Computation.query.filter_by(
+        id=computation_id,
+        user_id=current_user.id,
+    ).first()
+
+    if computation is None:
+        abort(404)
+
+    return render_template(
+        "index.html",
+        initial_inputs=computation.inputs,
+        template_source_id=computation.id,
+    )
+
+
 # ============================================================
 # HISTORY
 # ============================================================

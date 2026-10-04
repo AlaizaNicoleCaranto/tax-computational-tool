@@ -210,8 +210,12 @@ async function saveComputation() {
         } else {
             showToast(
                 "success",
-                "Computation saved",
-                "Your computation was saved to history."
+                window.templateSourceId
+                    ? "New computation saved"
+                    : "Computation saved",
+                window.templateSourceId
+                    ? "The original computation was left unchanged."
+                    : "Your computation was saved to history."
             );
         }
 
@@ -241,6 +245,17 @@ function resetForm() {
 }
 
 function resetFormSilently() {
+    const metadataInputs = [
+        document.getElementById("computationTitle"),
+        document.getElementById("computationNote")
+    ];
+
+    metadataInputs.forEach(function (input) {
+        if (input) {
+            input.value = "";
+        }
+    });
+
     const staticInputs = [
         dom.grossComp,
         dom.nonTaxComp,
@@ -375,6 +390,17 @@ export function attachEvents(domRefs) {
             return;
         }
 
+        if (target.dataset &&
+            target.dataset.setting === "percentage_tax_rate") {
+            document
+                .querySelectorAll('[data-setting="percentage_tax_rate"]')
+                .forEach(function (input) {
+                    if (input !== target) {
+                        input.value = target.value;
+                    }
+                });
+        }
+
         const dynamicClasses = [
             "ordinary-deduction",
             "other-income",
@@ -382,7 +408,8 @@ export function attachEvents(domRefs) {
             "nolco-a",
             "nolco-b",
             "nolco-c",
-            "nolco-d"
+            "nolco-d",
+            "setting-input"
         ];
 
         const isDynamic = dynamicClasses.some(function (cls) {

@@ -75,6 +75,21 @@ endblock %} {% block extra_css %}
     margin-bottom: 24px;
   }
 
+  .history-tools {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .history-tools input {
+    width: 100%;
+    max-width: 420px;
+    padding: 11px 12px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    font: inherit;
+  }
+
   .badge {
     display: inline-block;
     padding: 4px 10px;
@@ -102,6 +117,9 @@ endblock %} {% block extra_css %}
   </div>
 
   {% if computations %}
+  <div class="history-tools">
+    <input id="historySearch" type="search" placeholder="Search computations or schemes" aria-label="Search computations" />
+  </div>
   <div style="overflow-x: auto">
     <table class="history-table">
       <thead>
@@ -115,7 +133,7 @@ endblock %} {% block extra_css %}
       </thead>
       <tbody>
         {% for computation in computations %}
-        <tr>
+        <tr data-history-row data-search="{{ (computation.inputs.get('computation_title', 'Untitled computation') ~ ' ' ~ computation.best_scheme ~ ' ' ~ computation.taxpayer_type)|lower }}">
           <td>{{ computation.created_at.strftime('%b %d, %Y %I:%M %p') }}</td>
           <td>
             {% if computation.taxpayer_type == 'pure' %}
@@ -134,6 +152,12 @@ endblock %} {% block extra_css %}
               class="btn btn-sm"
             >
               View
+            </a>
+            <a
+              href="{{ url_for('main.edit', computation_id=computation.id) }}"
+              class="btn btn-sm"
+            >
+              Use as Template/Edit
             </a>
             <a
               href="{{ url_for('exports.export_pdf', computation_id=computation.id) }}"
@@ -169,4 +193,18 @@ endblock %} {% block extra_css %}
   {% endif %}
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const historySearch = document.getElementById("historySearch");
+  if (historySearch) {
+    historySearch.addEventListener("input", function () {
+      const query = this.value.trim().toLowerCase();
+      document.querySelectorAll("[data-history-row]").forEach(function (row) {
+        row.hidden = query !== "" && !row.dataset.search.includes(query);
+      });
+    });
+  }
+</script>
 {% endblock %}

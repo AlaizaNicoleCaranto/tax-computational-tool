@@ -276,6 +276,77 @@
         position: relative;
       }
 
+      @media (min-width: 901px) {
+        :root {
+          --sidebar-collapsed-width: 88px;
+        }
+
+        .sidebar {
+          width: var(--sidebar-collapsed-width);
+          overflow-x: hidden;
+          transition: width 0.2s ease;
+        }
+
+        .sidebar:hover,
+        .sidebar:focus-within {
+          width: var(--sidebar-width);
+        }
+
+        .sidebar:not(:hover):not(:focus-within) .brand-text,
+        .sidebar:not(:hover):not(:focus-within) .sidebar-section-label,
+        .sidebar:not(:hover):not(:focus-within) .sidebar-link span:not(.sidebar-icon),
+        .sidebar:not(:hover):not(:focus-within) .sidebar-logout {
+          display: none;
+        }
+
+        .sidebar:not(:hover):not(:focus-within) .sidebar-header {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+
+        .sidebar:not(:hover):not(:focus-within) .sidebar-brand {
+          justify-content: center;
+          gap: 0;
+        }
+
+        .sidebar:not(:hover):not(:focus-within) .sidebar-nav {
+          padding-left: 14px;
+          padding-right: 14px;
+        }
+
+        .sidebar:not(:hover):not(:focus-within) .sidebar-link {
+          justify-content: center;
+          padding-left: 10px;
+          padding-right: 10px;
+        }
+
+        .sidebar:not(:hover):not(:focus-within) .sidebar-footer {
+          padding-left: 14px;
+          padding-right: 14px;
+        }
+
+        .sidebar:not(:hover):not(:focus-within) .sidebar-logout {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          margin: 0 auto;
+          padding: 0;
+          border: none;
+          font-size: 0;
+        }
+
+        .sidebar:not(:hover):not(:focus-within) .sidebar-logout::before {
+          content: "↪";
+          font-size: 20px;
+        }
+
+        .main-content {
+          margin-left: var(--sidebar-collapsed-width);
+        }
+      }
+
       .content-user {
         position: absolute;
         top: 24px;
@@ -772,6 +843,13 @@
         </div>
         <nav class="sidebar-nav">
           <div class="sidebar-section-label">Main</div>
+          <a
+            href="{{ url_for('main.dashboard') }}"
+            class="sidebar-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}"
+          >
+            <span class="sidebar-icon">▦</span>
+            <span>Dashboard</span>
+          </a>
           <a
             href="{{ url_for('main.index') }}"
             class="sidebar-link {% if request.endpoint == 'main.index' %}active{% endif %}"

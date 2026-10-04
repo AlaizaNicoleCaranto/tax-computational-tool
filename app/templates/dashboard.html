@@ -1,0 +1,59 @@
+{% extends "base.html" %} {% block title %}Dashboard - Tax Computational Tool{% endblock %}
+{% block extra_css %}
+<style>
+  .dashboard-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .dashboard-header h1 { color: var(--color-primary); font-size: var(--font-size-xl); }
+  .dashboard-header p { color: var(--color-text-muted); margin-top: 4px; }
+  .dashboard-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { padding: 20px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); box-shadow: var(--shadow-sm); }
+  .stat-label { color: var(--color-text-muted); font-size: var(--font-size-sm); }
+  .stat-value { display: block; margin-top: 6px; color: var(--color-primary); font-size: var(--font-size-xl); font-weight: 700; }
+  .recent-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .recent-header h2 { color: var(--color-text); font-size: var(--font-size-lg); }
+  .recent-list { display: grid; gap: 10px; }
+  .recent-item { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--color-border); }
+  .recent-item:last-child { border-bottom: none; }
+  .recent-name { color: var(--color-text); font-weight: 700; }
+  .recent-meta { color: var(--color-text-muted); font-size: var(--font-size-sm); margin-top: 3px; }
+  .recent-tax { color: var(--color-primary); font-weight: 700; white-space: nowrap; }
+  .dashboard-empty { padding: 28px 0; color: var(--color-text-muted); }
+  @media (max-width: 700px) { .dashboard-stats { grid-template-columns: 1fr; } .recent-item { align-items: flex-start; flex-direction: column; gap: 8px; } }
+</style>
+{% endblock %}
+{% block authenticated_content %}
+<div class="dashboard-header">
+  <div>
+    <h1>Welcome back, {{ current_user.full_name }}</h1>
+    <p>Review your recent tax computations or start a new estimate.</p>
+  </div>
+  <a href="{{ url_for('main.index') }}" class="btn btn-success">New Computation</a>
+</div>
+
+<div class="dashboard-stats">
+  <div class="stat-card"><span class="stat-label">Saved computations</span><span class="stat-value">{{ computation_count }}</span></div>
+  <div class="stat-card"><span class="stat-label">Lowest calculated tax</span><span class="stat-value">PHP {{ '{:,.2f}'.format(lowest_tax) }}</span></div>
+  <div class="stat-card"><span class="stat-label">Account</span><span class="stat-value" style="font-size: var(--font-size-lg)">Active</span></div>
+</div>
+
+<div class="card">
+  <div class="recent-header">
+    <h2>Recent Computations</h2>
+    <a href="{{ url_for('main.history') }}" class="btn btn-sm">View History</a>
+  </div>
+  {% if computations %}
+  <div class="recent-list">
+    {% for computation in computations %}
+    <div class="recent-item">
+      <div>
+        <a class="recent-name" href="{{ url_for('main.view', computation_id=computation.id) }}">{{ computation.inputs.get('computation_title', 'Untitled computation') }}</a>
+        <div class="recent-meta">{{ computation.created_at.strftime('%b %d, %Y %I:%M %p') }} · {{ computation.best_scheme }}</div>
+      </div>
+      <div class="recent-tax">PHP {{ '{:,.2f}'.format(computation.best_tax or 0) }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="dashboard-empty">No saved computations yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

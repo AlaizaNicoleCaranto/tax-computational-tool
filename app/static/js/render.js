@@ -67,6 +67,29 @@ function pesoRow(label, value, className) {
     return row(label, formatPeso(value), className);
 }
 
+/**
+ * Build an editable numeric setting row for a tax scheme.
+ */
+function settingRow(label, setting, value, suffix) {
+    const numericValue = Number(value);
+    const inputValue = Number.isFinite(numericValue)
+        ? numericValue
+        : 0;
+
+    return (
+        '<div class="compute-row result-setting">' +
+        "<span>" + escapeHtml(label) + "</span>" +
+        '<span class="setting-control">' +
+        '<input type="number" class="setting-input" ' +
+        'data-setting="' + escapeHtml(setting) + '" ' +
+        'value="' + escapeHtml(inputValue) + '" ' +
+        'min="0" step="0.01" inputmode="decimal">' +
+        '<span class="setting-suffix">' +
+        escapeHtml(suffix) +
+        "</span></span></div>"
+    );
+}
+
 /* ============================================================
    SCHEME 1: OSD
    ============================================================ */
@@ -90,10 +113,13 @@ function renderOsd(result) {
     }
 
     parts.push(pesoRow("Sales / Receipts", result.sales));
-    parts.push(row(
-        "OSD (" + formatNumber(result.osd_percentage) + "%)",
-        formatPeso(result.osd_amount)
+    parts.push(settingRow(
+        "OSD Percentage",
+        "osd_percentage",
+        result.osd_percentage,
+        "%"
     ));
+    parts.push(pesoRow("OSD Amount", result.osd_amount));
     parts.push(pesoRow("Net Income", result.net_income, "subtotal"));
     parts.push(pesoRow(
         "Other Non-Operating Income",
@@ -110,12 +136,13 @@ function renderOsd(result) {
     }
 
     parts.push(pesoRow("Income Tax Due", result.income_tax));
-    parts.push(row(
-        "Percentage Tax (" +
-        formatNumber(result.percentage_tax_rate) +
-        "%)",
-        formatPeso(result.percentage_tax)
+    parts.push(settingRow(
+        "Percentage Tax Rate",
+        "percentage_tax_rate",
+        result.percentage_tax_rate,
+        "%"
     ));
+    parts.push(pesoRow("Percentage Tax Due", result.percentage_tax));
     parts.push(row(
         "TOTAL TAX DUES",
         formatPeso(result.total_tax),
@@ -184,12 +211,13 @@ function renderItemized(result) {
     }
 
     parts.push(pesoRow("Income Tax Due", result.income_tax));
-    parts.push(row(
-        "Percentage Tax (" +
-        formatNumber(result.percentage_tax_rate) +
-        "%)",
-        formatPeso(result.percentage_tax)
+    parts.push(settingRow(
+        "Percentage Tax Rate",
+        "percentage_tax_rate",
+        result.percentage_tax_rate,
+        "%"
     ));
+    parts.push(pesoRow("Percentage Tax Due", result.percentage_tax));
     parts.push(row(
         "TOTAL TAX DUES",
         formatPeso(result.total_tax),
@@ -247,25 +275,30 @@ function renderEight(result) {
             result.gross_income,
             "subtotal"
         ));
-        parts.push(pesoRow(
+        parts.push(settingRow(
             "Standard Deduction",
-            result.standard_deduction
+            "standard_deduction",
+            result.standard_deduction,
+            ""
         ));
         parts.push(pesoRow(
             "Taxable Income",
             result.taxable_income
         ));
-        parts.push(row(
-            "Tax Rate (" + formatNumber(result.flat_rate) + "%)",
-            formatPeso(result.income_tax)
+        parts.push(settingRow(
+            "Tax Rate",
+            "flat_rate",
+            result.flat_rate,
+            "%"
         ));
+        parts.push(pesoRow("Tax Due", result.income_tax));
     }
 
     if (result.vat_warning) {
         parts.push(
             '<div class="vat-warning">' +
-            "Gross income exceeds PHP 3,000,000. The 8% " +
-            "option is not available to VAT-registered " +
+                "Gross income exceeds PHP 3,000,000. This " +
+                "optional rate is not available to VAT-registered " +
             "taxpayers or those exceeding the VAT " +
             "threshold. Please verify eligibility with " +
             "the BIR." +

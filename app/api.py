@@ -3,6 +3,7 @@
 # ============================================================
 
 from datetime import datetime, timedelta
+import math
 
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
@@ -115,6 +116,70 @@ def has_any_input(data):
     return False
 
 
+def validate_tax_parameters(data):
+    """Reject impossible manual tax parameters before calculation."""
+    if not isinstance(data, dict):
+        return "Request data must be a JSON object."
+
+    percentage_fields = (
+        "osd_percentage",
+        "percentage_tax_rate",
+        "flat_rate",
+    )
+
+    for field in percentage_fields:
+        if field not in data:
+            continue
+        try:
+            value = float(data[field])
+        except (TypeError, ValueError):
+            return f"{field.replace('_', ' ').title()} must be numeric."
+        if not math.isfinite(value) or value < 0 or value > 100:
+            return f"{field.replace('_', ' ').title()} must be between 0 and 100."
+
+    if "standard_deduction" in data:
+        try:
+            value = float(data["standard_deduction"])
+            if not math.isfinite(value) or value < 0:
+                return "Standard deduction cannot be negative."
+        except (TypeError, ValueError):
+            return "Standard deduction must be numeric."
+
+    amount_fields = (
+        "gross_compensation",
+        "non_taxable_compensation",
+        "cash_sales",
+        "accrual_sales",
+        "cash_cost",
+        "accrual_cost",
+    )
+
+    for field in amount_fields:
+        if field not in data:
+            continue
+        try:
+            value = float(str(data[field]).replace(",", ""))
+        except (TypeError, ValueError):
+            return f"{field.replace('_', ' ').title()} must be numeric."
+        if not math.isfinite(value) or value < 0:
+            return f"{field.replace('_', ' ').title()} cannot be negative."
+
+    for field in ("other_income", "special_deductions", "nolco"):
+        if field in data and not isinstance(data[field], list):
+            return f"{field.replace('_', ' ').title()} must be a list."
+
+    for field in ("other_income", "special_deductions"):
+        for item in data.get(field, []):
+            if not isinstance(item, dict):
+                return f"Entries in {field.replace('_', ' ')} must be objects."
+
+    for row in data.get("nolco", []):
+        if not isinstance(row, dict):
+            return "NOLCO entries must be objects."
+
+    return None
+
+
 # ============================================================
 # COMPUTE ONLY (no save)
 # ============================================================
@@ -131,6 +196,10 @@ def compute():
 
     if not data:
         return jsonify({"error": "No data provided."}), 400
+
+    parameter_error = validate_tax_parameters(data)
+    if parameter_error:
+        return jsonify({"error": parameter_error}), 400
 
     taxpayer_type = data.get("taxpayer_type", "pure")
     if taxpayer_type not in ("pure", "mixed"):
@@ -160,6 +229,10 @@ def save():
 
     if not data:
         return jsonify({"error": "No data provided."}), 400
+
+    parameter_error = validate_tax_parameters(data)
+    if parameter_error:
+        return jsonify({"error": parameter_error}), 400
 
     taxpayer_type = data.get("taxpayer_type", "pure")
     if taxpayer_type not in ("pure", "mixed"):
