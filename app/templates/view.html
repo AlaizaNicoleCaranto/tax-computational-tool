@@ -143,7 +143,7 @@ Tax Computational Tool{% endblock %} {% block extra_css %}
   <div>
     <h1>{{ computation.inputs.get('computation_title', 'Untitled computation') }}</h1>
     <div class="meta">
-      Computation #{{ computation.id }} · Saved on {{ computation.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+      Computation #{{ computation.id }} · Saved on {{ computation.created_at|local_datetime('%B %d, %Y at %I:%M %p') }}
     </div>
     {% if computation.inputs.get('computation_note') %}
     <div class="meta">Note: {{ computation.inputs.get('computation_note') }}</div>

@@ -27,6 +27,9 @@ class Config:
     # Must be replaced with a strong random value in production.
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")
 
+    # Timezone used when displaying stored UTC timestamps to users.
+    DISPLAY_TIMEZONE = os.getenv("APP_TIMEZONE", "Asia/Singapore")
+
     # Database connection string. Defaults to SQLite for local
     # development. In production, this should be set to a
     # PostgreSQL URL via the DATABASE_URL environment variable.
