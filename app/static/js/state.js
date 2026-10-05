@@ -162,6 +162,27 @@ function readSetting(name, fallback) {
 }
 
 /**
+ * Read a result-card setting only when the result card has rendered it.
+ * Undefined values are omitted from JSON so the backend can use its
+ * automatic tax-table calculation on the first request.
+ */
+function readOptionalSetting(name) {
+    const element = document.querySelector(
+        '[data-setting="' + name + '"]'
+    );
+
+    if (!element) {
+        if (window.initialTaxFormState &&
+            window.initialTaxFormState[name] !== undefined) {
+            return parseNumber(window.initialTaxFormState[name]);
+        }
+        return undefined;
+    }
+
+    return parseNumber(element.value);
+}
+
+/**
  * Build the full request payload for /api/calculate.
  *
  * The shape matches what the backend expects. Optional
@@ -201,6 +222,21 @@ export function getFormState() {
         osd_percentage: readSetting("osd_percentage", 40),
         percentage_tax_rate: readSetting("percentage_tax_rate", 3),
         standard_deduction: readSetting("standard_deduction", 250000),
-        flat_rate: readSetting("flat_rate", 8)
+        flat_rate: readSetting("flat_rate", 8),
+
+        // Graduated tax-table values shown in the result cards
+        osd_basic_tax: readOptionalSetting("osd_basic_tax"),
+        osd_excess_amount: readOptionalSetting("osd_excess_amount"),
+        osd_excess_rate: readOptionalSetting("osd_excess_rate"),
+        itemized_basic_tax: readOptionalSetting("itemized_basic_tax"),
+        itemized_excess_amount: readOptionalSetting("itemized_excess_amount"),
+        itemized_excess_rate: readOptionalSetting("itemized_excess_rate"),
+        compensation_basic_tax: readOptionalSetting("compensation_basic_tax"),
+        compensation_excess_amount: readOptionalSetting(
+            "compensation_excess_amount"
+        ),
+        compensation_excess_rate: readOptionalSetting(
+            "compensation_excess_rate"
+        )
     };
 }

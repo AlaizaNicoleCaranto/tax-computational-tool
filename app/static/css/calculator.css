@@ -582,6 +582,11 @@
     color: var(--color-text-muted);
 }
 
+.setting-prefix {
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
 .compute-row.subtotal {
     background: var(--color-surface-alt);
     margin: 6px -10px;

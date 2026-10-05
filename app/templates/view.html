@@ -407,7 +407,9 @@ Tax Computational Tool{% endblock %} {% block extra_css %}
     </div>
     <div class="compute-row">
       <span>Tax Rate ({{ '{:.2f}'.format(eight.flat_rate) }}%)</span
-      ><span class="amount"></span>
+      ><span class="amount"
+        >PHP {{ '{:,.2f}'.format(eight.income_tax or 0) }}</span
+      >
     </div>
     {% endif %} {% if eight.vat_warning %}
     <div class="vat-warning">

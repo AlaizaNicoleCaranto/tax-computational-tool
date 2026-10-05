@@ -284,19 +284,51 @@
         .sidebar {
           width: var(--sidebar-collapsed-width);
           overflow-x: hidden;
-          transition: width 0.2s ease;
+          will-change: width;
+          transition:
+            width 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+            box-shadow 0.28s ease;
         }
 
         .sidebar:hover,
         .sidebar:focus-within {
           width: var(--sidebar-width);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .sidebar .brand-text,
+        .sidebar .sidebar-link span:not(.sidebar-icon) {
+          overflow: hidden;
+          white-space: nowrap;
+          transition:
+            max-width 0.22s ease,
+            opacity 0.16s ease,
+            visibility 0.16s ease;
         }
 
         .sidebar:not(:hover):not(:focus-within) .brand-text,
-        .sidebar:not(:hover):not(:focus-within) .sidebar-section-label,
-        .sidebar:not(:hover):not(:focus-within) .sidebar-link span:not(.sidebar-icon),
-        .sidebar:not(:hover):not(:focus-within) .sidebar-logout {
-          display: none;
+        .sidebar:not(:hover):not(:focus-within) .sidebar-link span:not(.sidebar-icon) {
+          max-width: 0;
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+        }
+
+        .sidebar .sidebar-section-label {
+          max-height: 40px;
+          overflow: hidden;
+          transition:
+            max-height 0.22s ease,
+            opacity 0.16s ease,
+            padding 0.22s ease;
+        }
+
+        .sidebar:not(:hover):not(:focus-within) .sidebar-section-label {
+          max-height: 0;
+          padding-top: 0;
+          padding-bottom: 0;
+          opacity: 0;
+          pointer-events: none;
         }
 
         .sidebar:not(:hover):not(:focus-within) .sidebar-header {
@@ -318,6 +350,11 @@
           justify-content: center;
           padding-left: 10px;
           padding-right: 10px;
+          transition:
+            justify-content 0.2s ease,
+            padding 0.24s ease,
+            background 0.2s ease,
+            color 0.2s ease;
         }
 
         .sidebar:not(:hover):not(:focus-within) .sidebar-footer {
@@ -334,12 +371,17 @@
           margin: 0 auto;
           padding: 0;
           border: none;
-          font-size: 0;
+          color: transparent;
+          transition:
+            width 0.24s ease,
+            color 0.16s ease,
+            background 0.2s ease;
         }
 
         .sidebar:not(:hover):not(:focus-within) .sidebar-logout::before {
           content: "↪";
           font-size: 20px;
+          color: #fff;
         }
 
         .main-content {

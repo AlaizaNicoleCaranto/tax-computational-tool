@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tax Computational Tool</title>
+
+    <style>
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI,Arial,sans-serif;
+}
+
+body{
+    background:#eef2f7;
+    min-height:100vh;
+    padding:25px;
+    color:#333;
+}
+
+.container{
+    width:1400px;
+    max-width:100%;
+    margin:auto;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.main-header{
+    background:#1565c0;
+    color:#fff;
+    padding:25px;
+    border-radius:16px 16px 0 0;
+    box-shadow:0 8px 25px rgba(0,0,0,.12);
+}
+
+.main-header h1{
+    text-align:center;
+    font-size:28px;
+    margin-bottom:6px;
+}
+
+.main-header p{
+    text-align:center;
+    font-size:14px;
+    opacity:.92;
+}
+
+/* =========================================================
+   MAIN CARD
+========================================================= */
+
+.main-card{
+    background:#fff;
+    box-shadow:0 8px 25px rgba(0,0,0,.12);
+}
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.section{
+    padding:24px;
+    border-bottom:1px solid #e1e5ea;
+}
+
+.section-title{
+    font-size:20px;
+    font-weight:700;
+    color:#1565c0;
+    margin-bottom:18px;
+}
+
+/* =========================================================
+   TAXPAYER TYPE
+========================================================= */
+
+.taxpayer-options{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+.taxpayer-option{
+    border:1px solid #d4dbe3;
+    border-radius:10px;
+    padding:16px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.taxpayer-option:hover{
+    border-color:#1565c0;
+    background:#f7fbff;
+}
+
+.taxpayer-option input{
+    margin-right:8px;
+}
+
+.taxpayer-option strong{
+    font-size:15px;
+}
+
+.option-description{
+    margin-top:7px;
+    padding-left:22px;
+    font-size:12px;
+    color:#777;
+}
+
+/* =========================================================
+   INPUT GRID
+========================================================= */
+
+.input-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.input-group{
+    margin-bottom:0;
+}
+
+.input-group label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:7px;
+}
+
+.input-box{
+    position:relative;
+}
+
+.input-box span{
+    position:absolute;
+    left:12px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#555;
+    font-weight:600;
+}
+
+.input-box input{
+    width:100%;
+    padding:12px 12px 12px 34px;
+    border:1px solid #ccd3db;
+    border-radius:8px;
+    outline:none;
+    font-size:15px;
+    transition:.2s;
+}
+
+.input-box input:focus{
+    border-color:#1565c0;
+    box-shadow:0 0 0 3px rgba(21,101,192,.10);
+}
+
+/* =========================================================
+   INFO BOX
+========================================================= */
+
+.info-box{
+    background:#f5f9ff;
+    border-left:4px solid #1565c0;
+    padding:12px 14px;
+    border-radius:7px;
+    font-size:12px;
+    color:#555;
+    line-height:1.6;
+}
+
+/* =========================================================
+   DYNAMIC LIST
+========================================================= */
+
+.dynamic-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.dynamic-row{
+    display:grid;
+    grid-template-columns:1fr 180px 40px;
+    gap:10px;
+    align-items:center;
+}
+
+.dynamic-row > input[type="text"]{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccd3db;
+    border-radius:7px;
+    outline:none;
+}
+
+.dynamic-row > input[type="text"]:focus{
+    border-color:#1565c0;
+}
+
+.dynamic-row .input-box{
+    width:100%;
+}
+
+.remove-btn{
+    border:none;
+    background:#ffebee;
+    color:#c62828;
+    width:34px;
+    height:34px;
+    border-radius:7px;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.remove-btn:hover{
+    background:#ffcdd2;
+}
+
+.add-btn{
+    margin-top:12px;
+    border:none;
+    background:#1565c0;
+    color:#fff;
+    border-radius:7px;
+    padding:10px 14px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.add-btn:hover{
+    background:#0d47a1;
+}
+
+/* =========================================================
+   ITEMIZED
+========================================================= */
+
+.itemized-panel{
+    margin-top:20px;
+    border:1px solid #dce2e8;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.itemized-header{
+    background:#f5f8fb;
+    padding:14px 16px;
+    font-weight:700;
+    color:#1565c0;
+}
+
+.deduction-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px 20px;
+    padding:16px;
+}
+
+.deduction-row{
+    display:grid;
+    grid-template-columns:1fr 150px;
+    gap:10px;
+    align-items:center;
+}
+
+.deduction-row label{
+    font-size:13px;
+    margin:0;
+}
+
+.deduction-row input{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid #ccd3db;
+    border-radius:7px;
+}
+
+/* =========================================================
+   BIR NOLCO TABLE STYLES
+========================================================= */
+
+.nolco-table-container{
+    width:100%;
+    overflow-x:auto;
+    margin-top:15px;
+}
+
+.nolco-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12px;
+}
+
+.nolco-table th, .nolco-table td{
+    border:1px solid #ccd3db;
+    padding:8px 10px;
+    text-align:center;
+}
+
+.nolco-table th{
+    background:#f5f8fb;
+    color:#1565c0;
+    font-weight:700;
+}
+
+.nolco-table input[type="text"]{
+    width:100%;
+    padding:6px 8px;
+    border:1px solid #c4d1df;
+    border-radius:8px;
+    font-size:12px;
+    text-align:right;
+    outline:none;
+}
+
+.nolco-table input.year-input{
+    text-align:center;
+}
+
+.nolco-table tr.total-row td{
+    background:#eef6fc;
+    font-weight:700;
+}
+
+/* =========================================================
+   QUESTION MARK / HOVER NOTE
+========================================================= */
+
+.note-wrap{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    margin-left:5px;
+}
+
+.note-icon{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:#1565c0;
+    color:#fff;
+    font-size:10px;
+    font-weight:700;
+    cursor:help;
+    user-select:none;
+}
+
+.note-tooltip{
+    position:absolute;
+    left:24px;
+    top:50%;
+    transform:translateY(-50%);
+    width:285px;
+    padding:10px 12px;
+    background:#333;
+    color:#fff;
+    border-radius:7px;
+    font-size:12px;
+    line-height:1.5;
+    font-weight:400;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:.15s ease;
+    z-index:9999;
+    box-shadow:0 7px 20px rgba(0,0,0,.22);
+}
+
+.note-tooltip::before{
+    content:"";
+    position:absolute;
+    left:-6px;
+    top:50%;
+    transform:translateY(-50%);
+    border-width:6px 6px 6px 0;
+    border-style:solid;
+    border-color:transparent #333 transparent transparent;
+}
+
+.note-wrap:hover .note-tooltip{
+    opacity:1;
+    visibility:visible;
+}
+
+.deduction-label{
+    display:flex;
+    align-items:center;
+    min-width:0;
+}
+
+.deduction-label-text{
+    line-height:1.4;
+}
+
+/* =========================================================
+   SCHEME RESULTS
+========================================================= */
+
+.scheme-section{
+    padding:24px;
+    border-bottom:1px solid #e1e5ea;
+}
+
+.scheme-title{
+    font-size:22px;
+    font-weight:700;
+    color:#1565c0;
+    margin-bottom:18px;
+}
+
+.scheme-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+/* =========================================================
+   SCHEME CARD
+========================================================= */
+
+.scheme-card{
+    border:1px solid #d8dfe6;
+    border-radius:12px;
+    overflow:hidden;
+    background:#fff;
+    margin-top: 15px;
+}
+
+.scheme-card-header{
+    background:#1565c0;
+    color:#fff;
+    padding:16px;
+    min-height:74px;
+}
+
+.scheme-card-header h3{
+    font-size:16px;
+    line-height:1.35;
+}
+
+.scheme-card-header p{
+    margin-top:4px;
+    font-size:11px;
+    opacity:.9;
+}
+
+.scheme-body{
+    padding:16px;
+}
+
+.compute-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    padding:9px 0;
+    border-bottom:1px solid #edf0f3;
+    font-size:13px;
+}
+
+.compute-row:last-child{
+    border-bottom:none;
+}
+
+.compute-row .amount{
+    font-weight:600;
+    text-align:right;
+    white-space:nowrap;
+}
+
+.compute-row.subtotal{
+    background:#f7f9fb;
+    margin:5px -8px;
+    padding:10px 8px;
+    border-radius:6px;
+}
+
+.compute-row.total{
+    margin-top:10px;
+    padding:13px 10px;
+    background:#e3f2fd;
+    border-radius:8px;
+    border:none;
+    font-size:15px;
+    font-weight:700;
+}
+
+.compute-row.total .amount{
+    color:#0d47a1;
+}
+
+/* Dynamic Manual Inputs Styling */
+.manual-input {
+    border: 1px solid #c4d1df;
+    border-radius: 8px;
+    padding: 6px 12px;
+    text-align: right;
+    font-size: 14px;
+    color: #333;
+    background-color: #ffffff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.manual-input:focus {
+    border-color: #1565c0;
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.12);
+}
+
+.manual-input-sm {
+    width: 65px !important;
+    text-align: right !important;
+    margin-right: 6px;
+}
+
+.manual-input-md {
+    width: 130px !important;
+    margin-left: 4px;
+}
+
+/* =========================================================
+   RECOMMENDATION
+========================================================= */
+
+.recommendation-section{
+    padding:24px;
+}
+
+.best-card{
+    background:#e8f5e9;
+    border-left:5px solid #2e7d32;
+    padding:15px;
+    border-radius:8px;
+    font-size:14px;
+    line-height:1.6;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer{
+    background:#f7f9fb;
+    text-align:center;
+    padding:15px;
+    color:#777;
+    font-size:12px;
+}
+
+/* =========================================================
+   HIDDEN
+========================================================= */
+
+.hidden{
+    display:none !important;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1050px){
+
+    .scheme-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:750px){
+
+    body{
+        padding:10px;
+    }
+
+    .input-grid,
+    .taxpayer-options,
+    .deduction-grid{
+        grid-template-columns:1fr;
+    }
+
+    .dynamic-row{
+        grid-template-columns:1fr;
+    }
+
+    .main-header h1{
+        font-size:22px;
+    }
+
+    .note-tooltip{
+        left:20px;
+        top:28px;
+        transform:none;
+    }
+
+    .note-tooltip::before{
+        left:8px;
+        top:-6px;
+        transform:none;
+        border-width:0 6px 6px 6px;
+        border-color:transparent transparent #333 transparent;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+    <div class="container">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="main-header">
+
+        <h1>
+            TAX COMPUTATIONAL TOOL
+        </h1>
+
+        <p>
+            Tax Scheme Selection of Individual Taxpayers
+        </p>
+
+    </header>
+
+
+    <main class="main-card">
+
+
+        <!-- =================================================
+             TAXPAYER TYPE
+        ================================================== -->
+
+        <section class="section">
+
+            <div class="section-title">
+                1. Taxpayer Classification
+            </div>
+
+            <div class="taxpayer-options">
+
+                <label class="taxpayer-option">
+
+                    <div>
+
+                        <input
+                        type="radio"
+                        name="taxpayerType"
+                        value="pure"
+                        checked
+                        >
+
+                        <strong>
+                            Purely Single Proprietor or Professional
+                        </strong>
+
+                    </div>
+
+                    <div class="option-description">
+
+                        Taxpayer earns income from business or
+                        profession only.
+
+                    </div>
+
+                </label>
+
+
+                <label class="taxpayer-option">
+
+                    <div>
+
+                        <input
+                        type="radio"
+                        name="taxpayerType"
+                        value="mixed"
+                        >
+
+                        <strong>
+                            Mixed Income Earner
+                        </strong>
+
+                    </div>
+
+                    <div class="option-description">
+
+                        Compensation earner and single proprietor
+                        or professional.
+
+                    </div>
+
+                </label>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             COMPENSATION
+        ================================================== -->
+
+        <section
+        id="compensationSection"
+        class="section hidden"
+        >
+
+        <div class="section-title">
+            Compensation Income
+        </div>
+
+        <div class="info-box">
+
+            For mixed income earners, Gross Compensation Income (Item 19)
+            and Total Non-Taxable/Exempt Compensation Income (Item 20) are
+            derived from the applicable BIR Form No. 2316 entries.
+
+        </div>
+
+        <div
+        class="input-grid"
+        style="margin-top:18px;"
+        >
+
+        <div class="input-group">
+
+            <label>
+                Gross Compensation Income
+            </label>
+
+            <div class="input-box">
+
+                <span>₱</span>
+
+                <input
+                type="text"
+                id="grossComp"
+                value="0"
+                oninput="formatInputValue(this); computeAll();"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Total Non-Taxable / Exempt Compensation Income
+            </label>
+
+            <div class="input-box">
+
+                <span>₱</span>
+
+                <input
+                type="text"
+                id="nonTaxComp"
+                value="0"
+                oninput="formatInputValue(this); computeAll();"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+        <!-- =================================================
+             COMMON BUSINESS INPUTS
+        ================================================== -->
+
+        <section class="section">
+
+            <div class="section-title">
+                2. Business / Professional Income
+            </div>
+
+            <div class="input-grid">
+
+                <div class="input-group">
+
+                    <label>
+
+                        Sales / Receipts — Cash
+
+                        <span class="note-wrap">
+
+                            <span class="note-icon">?</span>
+
+                            <span class="note-tooltip">
+                                This is the net of sales returns,
+                                allowances, and discounts.
+                            </span>
+
+                        </span>
+
+                    </label>
+
+                    <div class="input-box">
+
+                        <span>₱</span>
+
+                        <input
+                        type="text"
+                        id="cashSales"
+                        value="0"
+                        oninput="formatInputValue(this); computeAll();"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>
+
+                        Sales / Receipts — Accrual
+
+                        <span class="note-wrap">
+
+                            <span class="note-icon">?</span>
+
+                            <span class="note-tooltip">
+                                This is the net of sales returns,
+                                allowances, and discounts.
+                            </span>
+
+                        </span>
+
+                    </label>
+
+                    <div class="input-box">
+
+                        <span>₱</span>
+
+                        <input
+                        type="text"
+                        id="accrualSales"
+                        value="0"
+                        oninput="formatInputValue(this); computeAll();"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- OTHER INCOME -->
+
+            <div style="margin-top:20px;">
+
+                <label
+                style="
+                display:block;
+                font-size:14px;
+                font-weight:600;
+                margin-bottom:7px;
+                "
+                >
+
+                Other Non-Operating Income
+
+                <span class="note-wrap">
+
+                    <span class="note-icon">?</span>
+
+                    <span class="note-tooltip">
+                        This type of income comes from activities
+                        that are not in your ordinary course of
+                        business, such as dividend income, gain on
+                        sale of assets, interest income, and others,
+                        if applicable. Add boxes if necessary.
+                    </span>
+
+                </span>
+
+            </label>
+
+
+            <div
+            id="otherIncomeList"
+            class="dynamic-list"
+            >
+
+            <div class="dynamic-row">
+
+                <input
+                type="text"
+                value="Other Income 1"
+                class="other-income-title"
+                >
+
+                <div class="input-box">
+
+                    <span>₱</span>
+
+                    <input
+                    type="text"
+                    class="other-income"
+                    value="0"
+                    oninput="formatInputValue(this); computeAll();"
+                    >
+
+                </div>
+
+                <button
+                type="button"
+                class="remove-btn"
+                onclick="
+                this.parentElement.remove();
+                computeAll();
+                "
+                >
+                ×
+            </button>
+
+        </div>
+
+    </div>
+
+    <button
+    type="button"
+    class="add-btn"
+    onclick="addOtherIncome()"
+    >
+    + Add Other Income
+</button>
+
+</div>
+
+</section>
+
+
+        <!-- =================================================
+             ITEMIZED DEDUCTIONS
+        ================================================== -->
+
+        <section class="section">
+
+            <div class="section-title">
+                3. Itemized Deduction Information
+            </div>
+
+            <div class="info-box">
+
+                These fields are used by the
+                <strong>
+                    Graduated Income Tax with Itemized
+                    Deduction and Percentage Tax
+                </strong>
+                computation.
+
+            </div>
+
+
+            <div style="margin-top:18px;">
+
+                <div class="input-group">
+
+                    <label>
+                        Cost of Sales / Services
+                    </label>
+
+                    <div
+                    class="input-grid"
+                    style="margin-top:10px;"
+                    >
+
+                    <div class="input-group">
+
+                        <label>
+                            Cash
+                        </label>
+
+                        <div class="input-box">
+
+                            <span>₱</span>
+
+                            <input
+                            type="text"
+                            id="cashCost"
+                            value="0"
+                            oninput="formatInputValue(this); computeAll();"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label>
+                            Accrual
+                        </label>
+
+                        <div class="input-box">
+
+                            <span>₱</span>
+
+                            <input
+                            type="text"
+                            id="accrualCost"
+                            value="0"
+                            oninput="formatInputValue(this); computeAll();"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TOTAL -->
+
+                <div
+                style="
+                margin-top:12px;
+                padding:12px 14px;
+                background:#f5f8fb;
+                border-radius:8px;
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                font-weight:700;
+                color:#1565c0;
+                "
+                >
+
+                <span>
+                    Total Cost of Sales / Services
+                </span>
+
+                <span id="totalCostDisplay">
+                    ₱ 0.00
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ORDINARY -->
+
+    <div class="itemized-panel">
+
+        <div class="itemized-header">
+
+            Ordinary Allowable Itemized Deductions
+
+        </div>
+
+        <div
+        id="ordinaryDeductions"
+        class="deduction-grid"
+        ></div>
+
+    </div>
+
+
+    <!-- SPECIAL -->
+
+    <div
+    class="itemized-panel"
+    style="margin-top:15px;"
+    >
+
+    <div class="itemized-header">
+
+        Special Allowable Itemized Deductions
+
+        <span class="note-wrap">
+
+            <span class="note-icon">?</span>
+
+            <span class="note-tooltip">
+                Please ensure that information and
+                amounts have legal basis. Add boxes
+                if necessary.
+            </span>
+
+        </span>
+
+    </div>
+
+    <div
+    id="specialDeductions"
+    class="dynamic-list"
+    style="padding:16px;"
+    ></div>
+
+    <div style="padding:0 16px 16px;">
+
+        <button
+        type="button"
+        class="add-btn"
+        onclick="addSpecialDeduction()"
+        >
+        + Add Special Deduction
+    </button>
+
+</div>
+
+</div>
+
+
+<!-- NOLCO -->
+
+<div
+class="itemized-panel"
+style="margin-top:15px;"
+>
+
+    <div class="itemized-header">
+
+        Net Operating Loss Carry Over (NOLCO)
+
+    </div>
+
+
+    <div style="padding:16px;">
+
+        <!-- BIR 6.A.1 SCHEDULE TABLE -->
+        <div>
+            <strong style="font-size:14px; color:#1565c0;">6.A.1 - Taxpayer/Filer's Detailed Computation of Available NOLCO</strong>
+            
+            <div class="nolco-table-container">
+                <table class="nolco-table">
+                    <thead>
+                        <tr>
+                            <th colspan="2">Net Operating Loss</th>
+                            <th rowspan="2">B. NOLCO Applied<br>Previous Year/s</th>
+                            <th rowspan="2">C. NOLCO Expired</th>
+                            <th rowspan="2">D. NOLCO Applied<br>Current Year</th>
+                            <th rowspan="2">E. Net Operating Loss<br>(Unapplied)<br><small>[E = A - (B+C+D)]</small></th>
+                        </tr>
+                        <tr>
+                            <th>Year Incurred</th>
+                            <th>A. Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="nolcoTableBody">
+                        <tr>
+                            <td><input type="text" class="year-input" placeholder="YYYY" oninput="calculateNolcoSchedule()"></td>
+                            <td><input type="text" class="nolco-a" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-b" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-c" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-d" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-e" value="0" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="year-input" placeholder="YYYY" oninput="calculateNolcoSchedule()"></td>
+                            <td><input type="text" class="nolco-a" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-b" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-c" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-d" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-e" value="0" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="year-input" placeholder="YYYY" oninput="calculateNolcoSchedule()"></td>
+                            <td><input type="text" class="nolco-a" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-b" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-c" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-d" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-e" value="0" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="year-input" placeholder="YYYY" oninput="calculateNolcoSchedule()"></td>
+                            <td><input type="text" class="nolco-a" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-b" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-c" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-d" value="0" oninput="formatInputValue(this); calculateNolcoSchedule();"></td>
+                            <td><input type="text" class="nolco-e" value="0" readonly></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="4" style="text-align:right;">Total NOLCO Applied Current Year</td>
+                            <td id="totalNolcoD">₱ 0.00</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+        <!-- =================================================
+             TAX SCHEME RESULTS
+        ================================================== -->
+
+        <section class="scheme-section">
+
+            <div class="scheme-title">
+                4. Tax Scheme Computations
+            </div>
+
+            <div class="scheme-grid">
+
+
+                <!-- =========================================
+                     OSD
+                ========================================== -->
+
+                <div class="scheme-card">
+
+                    <div class="scheme-card-header">
+
+                        <h3>
+                            Graduated Income Tax with OSD
+                            and Percentage Tax
+                        </h3>
+
+                        <p>
+                            Tax Scheme 1
+                        </p>
+
+                    </div>
+
+
+                    <div
+                    id="osdResult"
+                    class="scheme-body"
+                    ></div>
+
+                </div>
+
+
+                <!-- =========================================
+                     ITEMIZED
+                ========================================== -->
+
+                <div class="scheme-card">
+
+                    <div class="scheme-card-header">
+
+                        <h3>
+                            Graduated Income Tax with
+                            Itemized Deduction and Percentage
+                        </h3>
+
+                        <p>
+                            Tax Scheme 2
+                        </p>
+
+                    </div>
+
+
+                    <div
+                    id="itemizedResult"
+                    class="scheme-body"
+                    ></div>
+
+                </div>
+
+
+                <!-- =========================================
+                     8%
+                ========================================== -->
+
+                <div class="scheme-card">
+
+                    <div class="scheme-card-header">
+
+                        <h3>
+                            Optional Income Tax Rate
+                        </h3>
+
+                        <p>
+                            Tax Scheme 3 (In lieu of graduated income tax
+                            and percentage tax)
+                        </p>
+
+                    </div>
+
+
+                    <div
+                    id="eightResult"
+                    class="scheme-body"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             RECOMMENDATION
+        ================================================== -->
+
+        <section class="recommendation-section">
+
+            <div
+            id="bestScheme"
+            class="best-card"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <div class="footer">
+
+            Automatic Computation • Tax Computational Tool
+
+            <br><br>
+
+            Reminder: Please make sure that all information and
+            amounts entered into this system are backed by proper
+            documents such as invoices, applicable BIR forms,
+            and other required attachments.
+
+            <br><br>
+
+            <b>Project by: Ella Mae A. Deriquito & Karylle M. Diaz</b>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+    const grossComp =
+    document.getElementById("grossComp");
+
+    const nonTaxComp =
+    document.getElementById("nonTaxComp");
+
+    const cashSales =
+    document.getElementById("cashSales");
+
+    const accrualSales =
+    document.getElementById("accrualSales");
+
+    const cashCost =
+    document.getElementById("cashCost");
+
+    const accrualCost =
+    document.getElementById("accrualCost");
+
+    const osdResult =
+    document.getElementById("osdResult");
+
+    const itemizedResult =
+    document.getElementById("itemizedResult");
+
+    const eightResult =
+    document.getElementById("eightResult");
+
+    const bestScheme =
+    document.getElementById("bestScheme");
+
+
+/* =========================================================
+   NUMBER
+========================================================= */
+
+    function num(value){
+
+        const number =
+        parseFloat(
+            String(value)
+            .replace(/,/g,"")
+            .replace(/₱/g,"")
+            .trim()
+            );
+
+        return isNaN(number)
+        ? 0
+        : number;
+
+    }
+
+
+    function formatInputValue(input){
+
+        const raw =
+        input.value
+        .replace(/,/g,"")
+        .replace(/[^\d.]/g,"");
+
+        if(raw === ""){
+            return;
+        }
+
+        const parts =
+        raw.split(".");
+
+        const integerPart =
+        parts[0] || "0";
+
+        const decimalPart =
+        parts.length > 1
+        ? "." + parts[1]
+        : "";
+
+        input.value =
+        Number(integerPart).toLocaleString("en-US") +
+        decimalPart;
+
+    }
+
+
+/* =========================================================
+   PESO
+========================================================= */
+
+    function peso(value){
+
+        return "₱ " +
+        Number(value || 0)
+        .toLocaleString(
+            "en-PH",
+            {
+                minimumFractionDigits:2,
+                maximumFractionDigits:2
+            }
+            );
+
+    }
+
+
+/* =========================================================
+   SCHEDULE 6.A.1 NOLCO COMPUTATION
+========================================================= */
+
+    function calculateNolcoSchedule(){
+
+        const rows = document.querySelectorAll("#nolcoTableBody tr:not(.total-row)");
+        let totalD = 0;
+
+        rows.forEach(row => {
+
+            const a = num(row.querySelector(".nolco-a").value);
+            const b = num(row.querySelector(".nolco-b").value);
+            const c = num(row.querySelector(".nolco-c").value);
+            const d = num(row.querySelector(".nolco-d").value);
+
+            totalD += d;
+
+            // Formula: E = A - (B + C + D)
+            const e = Math.max(0, a - (b + c + d));
+
+            row.querySelector(".nolco-e").value = peso(e);
+
+        });
+
+        const totalCell = document.getElementById("totalNolcoD");
+        if(totalCell) {
+            totalCell.textContent = peso(totalD);
+        }
+
+        computeAll();
+
+    }
+
+
+/* =========================================================
+   TAXPAYER TYPE
+========================================================= */
+
+    function taxpayerType(){
+
+        const selected =
+        document.querySelector(
+            'input[name="taxpayerType"]:checked'
+            );
+
+        return selected
+        ? selected.value
+        : "pure";
+
+    }
+
+    function getTotalCost(){
+
+        const cash =
+        num(document.getElementById("cashCost").value);
+
+        const accrual =
+        num(document.getElementById("accrualCost").value);
+
+        const total =
+        cash + accrual;
+
+        document.getElementById("totalCostDisplay").textContent =
+        peso(total);
+
+        return total;
+    }
+
+
+/* =========================================================
+   TOTAL SALES
+========================================================= */
+
+    function getSales(){
+
+        return (
+            num(cashSales.value) +
+            num(accrualSales.value)
+            );
+
+    }
+
+
+/* =========================================================
+   OTHER INCOME
+========================================================= */
+
+    function getOtherIncome(){
+
+        let total = 0;
+
+        document
+        .querySelectorAll(".other-income")
+        .forEach(input => {
+
+            total +=
+            num(input.value);
+
+        });
+
+        return total;
+
+    }
+
+
+/* =========================================================
+   COMPENSATION
+========================================================= */
+
+    function getCompensation(){
+
+        const gross =
+        num(grossComp.value);
+
+        const exempt =
+        num(nonTaxComp.value);
+
+        const taxable =
+        Math.max(
+            0,
+            gross - exempt
+            );
+
+        return {
+
+            gross:gross,
+            exempt:exempt,
+            taxable:taxable
+
+        };
+
+    }
+
+
+/* =========================================================
+   RESULT ROW HELPER
+========================================================= */
+
+    function row(
+        label,
+        value,
+        className=""
+        ){
+
+        return `
+
+        <div class="compute-row ${className}">
+
+            <span>
+                ${label}
+            </span>
+
+            <span class="amount">
+                ${peso(value)}
+            </span>
+
+        </div>
+
+        `;
+
+    }
+
+
+/* =========================================================
+   DISPLAY OSD (SCHEME 1)
+========================================================= */
+
+    function displayOSD(data){
+
+        const mixed = taxpayerType() === "mixed";
+
+        // Preserve focus and value during recalculations
+        const activeElementId = document.activeElement ? document.activeElement.id : null;
+        const osdPctVal = document.getElementById("osdPctInput") ? document.getElementById("osdPctInput").value : "";
+        const basicTaxVal = document.getElementById("osdBasicTaxInput") ? document.getElementById("osdBasicTaxInput").value : "";
+        const excessVal = document.getElementById("osdExcessInput") ? document.getElementById("osdExcessInput").value : "";
+        const excessRateVal = document.getElementById("osdExcessRateInput") ? document.getElementById("osdExcessRateInput").value : "";
+        const pctRateVal = document.getElementById("osdPctRateInput") ? document.getElementById("osdPctRateInput").value : "";
+
+        const osdPct = num(osdPctVal);
+        const basicTax = num(basicTaxVal);
+        const excessAmount = num(excessVal);
+        const excessRate = num(excessRateVal);
+        const pctRate = num(pctRateVal);
+
+        const sales = getSales();
+        const osdAmount = sales * (osdPct / 100);
+        const netIncome = Math.max(0, sales - osdAmount);
+        const otherIncome = getOtherIncome();
+        const taxableIncome = netIncome + otherIncome;
+        const totalTaxable = mixed ? data.compensation.taxable + taxableIncome : taxableIncome;
+
+        const incomeTaxDue = basicTax + (excessAmount * (excessRate / 100));
+        const grossIncomeForPct = sales + otherIncome;
+        const percentageTaxDue = grossIncomeForPct * (pctRate / 100);
+        const totalTax = incomeTaxDue + percentageTaxDue;
+
+        let html = "";
+
+        if(mixed){
+            html += row("Gross Compensation Income", data.compensation.gross);
+            html += row("Non-Taxable / Exempt Compensation", data.compensation.exempt);
+            html += row("Taxable Compensation Income", data.compensation.taxable);
+        }
+
+        html += row("Sales / Receipts", sales);
+
+        html += `
+        <div class="compute-row">
+            <span>OSD Percentage</span>
+            <span class="amount">
+                <input type="text" id="osdPctInput" class="manual-input manual-input-sm" value="${osdPctVal}" placeholder="0" oninput="formatInputValue(this); computeAll();"> %
+            </span>
+        </div>
+        `;
+
+        html += row("OSD Amount", osdAmount);
+        html += row("Net Income", netIncome, "subtotal");
+        html += row("Other Non-Operating Income", otherIncome);
+        html += row("Taxable Income", taxableIncome);
+
+        if(mixed){
+            html += row("Total Taxable Income", totalTaxable, "subtotal");
+        }
+
+        html += `
+        <div class="compute-row">
+            <span>Basic Amount based on Tax Table</span>
+            <span class="amount">
+                ₱ <input type="text" id="osdBasicTaxInput" class="manual-input manual-input-md" value="${basicTaxVal}" placeholder="0.00" oninput="formatInputValue(this); computeAll();">
+            </span>
+        </div>
+        <div class="compute-row">
+            <span>Excess Amount</span>
+            <span class="amount">
+                ₱ <input type="text" id="osdExcessInput" class="manual-input manual-input-md" value="${excessVal}" placeholder="0.00" oninput="formatInputValue(this); computeAll();">
+            </span>
+        </div>
+        <div class="compute-row">
+            <span>% of the Excess</span>
+            <span class="amount">
+                <input type="text" id="osdExcessRateInput" class="manual-input manual-input-sm" value="${excessRateVal}" placeholder="0" oninput="formatInputValue(this); computeAll();"> %
+            </span>
+        </div>
+        `;
+
+        html += row("Income Tax Due", incomeTaxDue);
+        html += row("Gross Income", grossIncomeForPct);
+
+        html += `
+        <div class="compute-row">
+            <span>Percentage Tax Rate</span>
+            <span class="amount">
+                <input type="text" id="osdPctRateInput" class="manual-input manual-input-sm" value="${pctRateVal}" placeholder="0" oninput="formatInputValue(this); computeAll();"> %
+            </span>
+        </div>
+        `;
+
+        html += row("Percentage Tax Due", percentageTaxDue);
+
+        html += `
+        <div class="compute-row total">
+            <span>TOTAL TAX DUES</span>
+            <span class="amount">${peso(totalTax)}</span>
+        </div>
+        `;
+
+        osdResult.innerHTML = html;
+
+        if(activeElementId && document.getElementById(activeElementId)){
+            const el = document.getElementById(activeElementId);
+            el.focus();
+            const len = el.value.length;
+            el.setSelectionRange(len, len);
+        }
+
+        return { totalTax: totalTax };
+    }
+
+
+/* =========================================================
+   DISPLAY ITEMIZED (SCHEME 2)
+========================================================= */
+
+    function displayItemized(data){
+
+        const mixed = taxpayerType() === "mixed";
+
+        // Preserve focus and value during recalculations
+        const activeElementId = document.activeElement ? document.activeElement.id : null;
+        const basicTaxVal = document.getElementById("itemBasicTaxInput") ? document.getElementById("itemBasicTaxInput").value : "";
+        const excessVal = document.getElementById("itemExcessInput") ? document.getElementById("itemExcessInput").value : "";
+        const excessRateVal = document.getElementById("itemExcessRateInput") ? document.getElementById("itemExcessRateInput").value : "";
+        const pctRateVal = document.getElementById("itemPctRateInput") ? document.getElementById("itemPctRateInput").value : "";
+
+        const basicTax = num(basicTaxVal);
+        const excessAmount = num(excessVal);
+        const excessRate = num(excessRateVal);
+        const pctRate = num(pctRateVal);
+
+        const sales = getSales();
+        const cost = getTotalCost();
+        const grossOperation = Math.max(0, sales - cost);
+
+        let ordinary = 0;
+        document.querySelectorAll(".ordinary-deduction").forEach(input => { ordinary += num(input.value); });
+
+        let special = 0;
+        document.querySelectorAll(".special-deduction").forEach(input => { special += num(input.value); });
+
+        // Sum up NOLCO Applied Current Year (Column D) directly from schedule table
+        let totalAvailableNolco = 0;
+        document.querySelectorAll("#nolcoTableBody .nolco-d").forEach(input => {
+            totalAvailableNolco += num(input.value);
+        });
+
+        const preliminaryIncome = Math.max(0, grossOperation - ordinary - special) + getOtherIncome();
+        const nolcoUsed = Math.min(totalAvailableNolco, preliminaryIncome);
+
+        const totalDeduction = ordinary + special + nolcoUsed;
+        const netIncome = Math.max(0, grossOperation - ordinary - special - nolcoUsed);
+        const otherIncome = getOtherIncome();
+        const businessTaxable = Math.max(0, netIncome + otherIncome);
+
+        const combinedTaxable = mixed ? data.compensation.taxable + businessTaxable : businessTaxable;
+
+        const incomeTaxDue = basicTax + (excessAmount * (excessRate / 100));
+        const grossIncomeForPct = sales + otherIncome;
+        const percentageTaxDue = grossIncomeForPct * (pctRate / 100);
+        const totalTax = incomeTaxDue + percentageTaxDue;
+
+        let html = "";
+
+        if(mixed){
+            html += row("Gross Compensation Income", data.compensation.gross);
+            html += row("Non-Taxable / Exempt Compensation", data.compensation.exempt);
+            html += row("Taxable Compensation Income", data.compensation.taxable);
+        }
+
+        html += row("Sales / Receipts", sales);
+        html += row("Cost of Sales / Services", cost);
+        html += row("Gross Income from Operation", grossOperation, "subtotal");
+        html += row("Ordinary Allowable Deductions", ordinary);
+        html += row("Special Allowable Deductions", special);
+        html += row("Available NOLCO", nolcoUsed);
+        html += row("Total Allowable Itemized Deduction", totalDeduction, "subtotal");
+        html += row("Net Income", netIncome, "subtotal");
+        html += row("Other Non-Operating Income", otherIncome);
+        html += row("Taxable Income", businessTaxable);
+
+        if(mixed){
+            html += row("Total Taxable Income", combinedTaxable, "subtotal");
+        }
+
+        html += `
+        <div class="compute-row">
+            <span>Basic Amount based on Tax Table</span>
+            <span class="amount">
+                ₱ <input type="text" id="itemBasicTaxInput" class="manual-input manual-input-md" value="${basicTaxVal}" placeholder="0.00" oninput="formatInputValue(this); computeAll();">
+            </span>
+        </div>
+        <div class="compute-row">
+            <span>Excess Amount</span>
+            <span class="amount">
+                ₱ <input type="text" id="itemExcessInput" class="manual-input manual-input-md" value="${excessVal}" placeholder="0.00" oninput="formatInputValue(this); computeAll();">
+            </span>
+        </div>
+        <div class="compute-row">
+            <span>% of the Excess</span>
+            <span class="amount">
+                <input type="text" id="itemExcessRateInput" class="manual-input manual-input-sm" value="${excessRateVal}" placeholder="0" oninput="formatInputValue(this); computeAll();">%
+            </span>
+        </div>
+        `;
+
+        html += row("Income Tax Due", incomeTaxDue);
+        html += row("Gross Income", grossIncomeForPct);
+
+        html += `
+        <div class="compute-row">
+            <span>Percentage Tax Rate</span>
+            <span class="amount">
+                <input type="text" id="itemPctRateInput" class="manual-input manual-input-sm" value="${pctRateVal}" placeholder="0" oninput="formatInputValue(this); computeAll();">%
+            </span>
+        </div>
+        `;
+
+        html += row("Percentage Tax Due", percentageTaxDue);
+
+        html += `
+        <div class="compute-row total">
+            <span>TOTAL TAX DUES</span>
+            <span class="amount">${peso(totalTax)}</span>
+        </div>
+        `;
+
+        itemizedResult.innerHTML = html;
+
+        if(activeElementId && document.getElementById(activeElementId)){
+            const el = document.getElementById(activeElementId);
+            el.focus();
+            const len = el.value.length;
+            el.setSelectionRange(len, len);
+        }
+
+        return { totalTax: totalTax };
+    }
+
+
+/* =========================================================
+   DISPLAY 8% (SCHEME 3)
+========================================================= */
+
+    function displayEight(data){
+
+        const mixed = taxpayerType() === "mixed";
+
+        // Preserve focus and value during recalculations
+        const activeElementId = document.activeElement ? document.activeElement.id : null;
+        const standardDeductionVal = document.getElementById("eightStdDedInput") ? document.getElementById("eightStdDedInput").value : "";
+        const flatRateVal = document.getElementById("eightFlatRateInput") ? document.getElementById("eightFlatRateInput").value : "";
+        const compBasicTaxVal = document.getElementById("compBasicTaxInput") ? document.getElementById("compBasicTaxInput").value : "";
+        const compExcessVal = document.getElementById("compExcessInput") ? document.getElementById("compExcessInput").value : "";
+        const compExcessRateVal = document.getElementById("compExcessRateInput") ? document.getElementById("compExcessRateInput").value : "";
+
+        const standardDeduction = num(standardDeductionVal);
+        const flatRate = num(flatRateVal);
+        const compBasicTax = num(compBasicTaxVal);
+        const compExcessAmount = num(compExcessVal);
+        const compExcessRate = num(compExcessRateVal);
+
+        const sales = getSales();
+        const otherIncome = getOtherIncome();
+        const grossBusinessIncome = sales + otherIncome;
+
+        let totalTax = 0;
+        let html = "";
+
+        if(!mixed){
+            const taxableIncome = Math.max(0, grossBusinessIncome - standardDeduction);
+            const tax = taxableIncome * (flatRate / 100);
+            totalTax = tax;
+
+            html += row("Sales / Receipts", sales);
+            html += row("Other Non-Operating Income", otherIncome);
+            html += row("Gross Income", grossBusinessIncome, "subtotal");
+
+            html += `
+            <div class="compute-row">
+                <span>Standard Deduction</span>
+                <span class="amount">
+                    ₱ <input type="text" id="eightStdDedInput" class="manual-input manual-input-md" value="${standardDeductionVal}" placeholder="0.00" oninput="formatInputValue(this); computeAll();">
+                </span>
+            </div>
+            `;
+
+            html += row("Taxable Income", taxableIncome);
+
+            html += `
+            <div class="compute-row">
+                <span>Tax Rate</span>
+                <span class="amount">
+                    <input type="text" id="eightFlatRateInput" class="manual-input manual-input-sm" value="${flatRateVal}" placeholder="0" oninput="formatInputValue(this); computeAll();">%
+                </span>
+            </div>
+            `;
+
+            html += row("Tax Due", tax);
+
+            html += `
+            <div class="compute-row total">
+                <span>TOTAL TAX DUES</span>
+                <span class="amount">${peso(totalTax)}</span>
+            </div>
+            `;
+        } else {
+            const compensationTaxDue = compBasicTax + (compExcessAmount * (compExcessRate / 100));
+            const businessTax = grossBusinessIncome * (flatRate / 100);
+            totalTax = compensationTaxDue + businessTax;
+
+            html += row("Gross Compensation Income", data.compensation.gross);
+            html += row("Non-Taxable / Exempt Compensation", data.compensation.exempt);
+            html += row("Taxable Compensation Income", data.compensation.taxable);
+
+            html += `
+            <div class="compute-row">
+                <span>Basic Amount based on Tax Table</span>
+                <span class="amount">
+                    ₱ <input type="text" id="compBasicTaxInput" class="manual-input manual-input-md" value="${compBasicTaxVal}" placeholder="0.00" oninput="formatInputValue(this); computeAll();">
+                </span>
+            </div>
+            <div class="compute-row">
+                <span>Excess Amount</span>
+                <span class="amount">
+                    ₱ <input type="text" id="compExcessInput" class="manual-input manual-input-md" value="${compExcessVal}" placeholder="0.00" oninput="formatInputValue(this); computeAll();">
+                </span>
+            </div>
+            <div class="compute-row">
+                <span>% of the Excess</span>
+                <span class="amount">
+                    <input type="text" id="compExcessRateInput" class="manual-input manual-input-sm" value="${compExcessRateVal}" placeholder="0" oninput="formatInputValue(this); computeAll();">%
+                </span>
+            </div>
+            `;
+
+            html += row("Compensation Tax Due", compensationTaxDue);
+            html += row("Sales / Receipts", sales);
+            html += row("Other Non-Operating Income", otherIncome);
+            html += row("Gross Income / Taxable Income", grossBusinessIncome);
+
+            html += `
+            <div class="compute-row">
+                <span>Tax Rate</span>
+                <span class="amount">
+                    <input type="text" id="eightFlatRateInput" class="manual-input manual-input-sm" value="${flatRateVal}" placeholder="0" oninput="formatInputValue(this); computeAll();">%
+                </span>
+            </div>
+            `;
+
+            html += row("Tax Due", businessTax);
+
+            html += `
+            <div class="compute-row total">
+                <span>TOTAL TAX DUES</span>
+                <span class="amount">${peso(totalTax)}</span>
+            </div>
+            `;
+        }
+
+        eightResult.innerHTML = html;
+
+        if(activeElementId && document.getElementById(activeElementId)){
+            const el = document.getElementById(activeElementId);
+            el.focus();
+            const len = el.value.length;
+            el.setSelectionRange(len, len);
+        }
+
+        return { totalTax: totalTax };
+    }
+
+
+/* =========================================================
+   GENERATE COMPARISON RESULT
+========================================================= */
+
+    function generateInterpretation(
+        osdTax,
+        itemizedTax,
+        eightTax
+        ){
+
+        const totals = [
+
+            {
+                name: "Graduated + OSD + PT",
+                total: osdTax
+            },
+
+            {
+                name: "Graduated + Itemized + PT",
+                total: itemizedTax
+            },
+
+            {
+                name: "Optional Income Tax Rate",
+                total: eightTax
+            }
+
+        ];
+
+
+        const lowest =
+        totals.reduce(
+            (lowest,current) =>
+            current.total < lowest.total
+            ? current
+            : lowest
+            );
+
+
+        bestScheme.innerHTML = `
+
+    <strong>
+        Comparison Result
+    </strong>
+
+    <br>
+
+    Based on the figures entered, the lowest
+    calculated total among the three displayed
+    schemes is
+
+    <strong>
+        ${lowest.name}
+    </strong>
+
+    with a calculated amount of
+
+    <strong>
+        ${peso(lowest.total)}
+    </strong>.
+
+    <br><br>
+
+    This comparison is only a mathematical comparison
+    of the figures entered. Actual eligibility,
+    tax-option requirements, documentation, and
+    applicable BIR rules must still be checked.
+
+        `;
+
+    }
+
+
+/* =========================================================
+   MAIN COMPUTATION
+========================================================= */
+
+    function computeAll(){
+
+        const compData = {
+            compensation: getCompensation()
+        };
+
+        const osdRes = displayOSD(compData);
+        const itemRes = displayItemized(compData);
+        const eightRes = displayEight(compData);
+
+        generateInterpretation(
+            osdRes.totalTax,
+            itemRes.totalTax,
+            eightRes.totalTax
+        );
+
+    }
+
+
+/* =========================================================
+   ADD OTHER INCOME
+========================================================= */
+
+    function addOtherIncome(){
+
+        const list =
+        document.getElementById(
+            "otherIncomeList"
+            );
+
+
+        const row =
+        document.createElement(
+            "div"
+            );
+
+
+        row.className =
+        "dynamic-row";
+
+
+        const number =
+        list.children.length + 1;
+
+
+        row.innerHTML = `
+
+    <input
+        type="text"
+        value="Other Income ${number}"
+        class="other-income-title"
+    >
+
+    <div class="input-box">
+
+        <span>₱</span>
+
+        <input
+            type="text"
+            class="other-income"
+            value="0"
+            oninput="formatInputValue(this); computeAll();"
+        >
+
+    </div>
+
+    <button
+        type="button"
+        class="remove-btn"
+    >
+        ×
+    </button>
+
+        `;
+
+
+        row
+        .querySelector(
+            ".remove-btn"
+            )
+        .addEventListener(
+            "click",
+            function(){
+
+                row.remove();
+
+                computeAll();
+
+            }
+            );
+
+
+        list.appendChild(
+            row
+            );
+
+
+        attachDynamicListeners();
+
+    }
+
+
+/* =========================================================
+   ADD SPECIAL DEDUCTION
+========================================================= */
+
+    function addSpecialDeduction(){
+
+        const list =
+        document.getElementById(
+            "specialDeductions"
+            );
+
+
+        const row =
+        document.createElement(
+            "div"
+            );
+
+
+        row.className =
+        "dynamic-row";
+
+
+        row.innerHTML = `
+
+    <input
+        type="text"
+        placeholder="Title of the deduction"
+        class="special-title"
+    >
+
+    <div class="input-box">
+
+        <span>₱</span>
+
+        <input
+            type="text"
+            class="special-deduction"
+            value="0"
+            oninput="formatInputValue(this); computeAll();"
+        >
+
+    </div>
+
+    <button
+        type="button"
+        class="remove-btn"
+    >
+        ×
+    </button>
+
+        `;
+
+
+        row
+        .querySelector(
+            ".remove-btn"
+            )
+        .addEventListener(
+            "click",
+            function(){
+
+                row.remove();
+
+                computeAll();
+
+            }
+            );
+
+
+        list.appendChild(
+            row
+            );
+
+
+        attachDynamicListeners();
+
+    }
+
+
+/* =========================================================
+   ORDINARY DEDUCTIONS
+========================================================= */
+
+    const ordinaryNames = [
+
+        "Amortizations",
+
+        "Bad Debts",
+
+        "Charitable and Other Contributions",
+
+        "Depletion",
+
+        "Depreciation",
+
+        "Entertainment, Amusement and Recreation",
+
+        "Fringe Benefits",
+
+        "Interest",
+
+        "Losses",
+
+        "Pension Trusts",
+
+        "Rental",
+
+        "Research and Development",
+
+        "Salaries, Wages and Allowances",
+
+        "SSS, GSIS, PhilHealth, HDMF and Other Contributions",
+
+        "Taxes and Licenses",
+
+        "Transportation and Travel",
+
+        "Janitorial and Messengerial Services",
+
+        "Professional Fees",
+
+        "Security Services",
+
+        "Other Expenses"
+
+    ];
+
+
+    const ordinaryContainer =
+    document.getElementById(
+        "ordinaryDeductions"
+        );
+
+
+    ordinaryNames.forEach(
+        name => {
+
+            const row =
+            document.createElement(
+                "div"
+                );
+
+
+            row.className =
+            "deduction-row";
+
+
+            row.innerHTML = `
+
+        <div class="deduction-label">
+
+            <span class="deduction-label-text">
+                ${name}
+            </span>
+
+        </div>
+
+        <input
+            type="text"
+            class="ordinary-deduction"
+            value="0"
+            oninput="formatInputValue(this); computeAll();"
+        >
+
+            `;
+
+
+            ordinaryContainer.appendChild(
+                row
+                );
+
+        }
+        );
+
+
+/* =========================================================
+   DYNAMIC LISTENERS
+========================================================= */
+
+    function attachDynamicListeners(){
+
+        document
+        .querySelectorAll(
+            ".other-income, .ordinary-deduction, .special-deduction"
+            )
+        .forEach(
+            input => {
+
+                input.removeEventListener(
+                    "input",
+                    computeAll
+                    );
+
+                input.addEventListener(
+                    "input",
+                    computeAll
+                    );
+
+            }
+            );
+
+    }
+
+
+/* =========================================================
+   ALL INPUTS
+========================================================= */
+
+    document
+    .querySelectorAll(
+        "input"
+        )
+    .forEach(
+        input => {
+
+            input.addEventListener(
+                "input",
+                computeAll
+                );
+
+        }
+        );
+
+
+    document
+    .querySelectorAll(
+        'input[name="taxpayerType"]'
+        )
+    .forEach(
+        radio => {
+
+            radio.addEventListener(
+                "change",
+                function(){
+
+                    const mixed =
+                    taxpayerType() === "mixed";
+
+
+                    document
+                    .getElementById(
+                        "compensationSection"
+                        )
+                    .classList
+                    .toggle(
+                        "hidden",
+                        !mixed
+                        );
+
+
+                    computeAll();
+
+                }
+                );
+
+        }
+        );
+
+
+/* =========================================================
+   INITIAL COMPUTATION
+========================================================= */
+
+    attachDynamicListeners();
+
+    calculateNolcoSchedule();
+
+    computeAll();
+
+</script>
+
+</body>
+</html>

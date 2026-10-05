@@ -70,7 +70,7 @@ function pesoRow(label, value, className) {
 /**
  * Build an editable numeric setting row for a tax scheme.
  */
-function settingRow(label, setting, value, suffix) {
+function settingRow(label, setting, value, suffix, prefix) {
     const numericValue = Number(value);
     const inputValue = Number.isFinite(numericValue)
         ? numericValue
@@ -80,6 +80,11 @@ function settingRow(label, setting, value, suffix) {
         '<div class="compute-row result-setting">' +
         "<span>" + escapeHtml(label) + "</span>" +
         '<span class="setting-control">' +
+                (prefix
+                        ? '<span class="setting-prefix">' +
+                            escapeHtml(prefix) +
+                            "</span>"
+                        : "") +
         '<input type="number" class="setting-input" ' +
         'data-setting="' + escapeHtml(setting) + '" ' +
         'value="' + escapeHtml(inputValue) + '" ' +
@@ -135,6 +140,26 @@ function renderOsd(result) {
         ));
     }
 
+    parts.push(settingRow(
+        "Basic Amount based on Tax Table",
+        "osd_basic_tax",
+        result.basic_tax,
+        "",
+        "PHP"
+    ));
+    parts.push(settingRow(
+        "Excess Amount",
+        "osd_excess_amount",
+        result.excess_amount,
+        "",
+        "PHP"
+    ));
+    parts.push(settingRow(
+        "% of the Excess",
+        "osd_excess_rate",
+        result.excess_rate,
+        "%"
+    ));
     parts.push(pesoRow("Income Tax Due", result.income_tax));
     parts.push(settingRow(
         "Percentage Tax Rate",
@@ -210,6 +235,26 @@ function renderItemized(result) {
         ));
     }
 
+    parts.push(settingRow(
+        "Basic Amount based on Tax Table",
+        "itemized_basic_tax",
+        result.basic_tax,
+        "",
+        "PHP"
+    ));
+    parts.push(settingRow(
+        "Excess Amount",
+        "itemized_excess_amount",
+        result.excess_amount,
+        "",
+        "PHP"
+    ));
+    parts.push(settingRow(
+        "% of the Excess",
+        "itemized_excess_rate",
+        result.excess_rate,
+        "%"
+    ));
     parts.push(pesoRow("Income Tax Due", result.income_tax));
     parts.push(settingRow(
         "Percentage Tax Rate",
@@ -246,6 +291,26 @@ function renderEight(result) {
         parts.push(pesoRow(
             "Taxable Compensation",
             result.compensation.taxable
+        ));
+        parts.push(settingRow(
+            "Basic Amount based on Tax Table",
+            "compensation_basic_tax",
+            result.basic_tax,
+            "",
+            "PHP"
+        ));
+        parts.push(settingRow(
+            "Excess Amount",
+            "compensation_excess_amount",
+            result.excess_amount,
+            "",
+            "PHP"
+        ));
+        parts.push(settingRow(
+            "% of the Excess",
+            "compensation_excess_rate",
+            result.excess_rate,
+            "%"
         ));
         parts.push(pesoRow(
             "Compensation Tax Due",

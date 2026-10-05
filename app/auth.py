@@ -140,7 +140,7 @@ def login():
         ):
             login_user(user)
             flash(f"Welcome back, {user.full_name}!", "success")
-            return redirect(url_for("main.index"))
+            return redirect(url_for("main.dashboard"))
 
         flash("Invalid email or password.", "error")
         return redirect(url_for("auth.login"))

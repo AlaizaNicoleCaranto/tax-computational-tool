@@ -15,7 +15,7 @@
 # that the recommendation logic and the frontend can treat
 # them uniformly.
 
-from app.tax.graduated import compute_graduated_tax
+from app.tax.graduated import compute_graduated_breakdown
 from app.tax.helpers import (
     get_compensation,
     get_nolco_applied,
@@ -35,6 +35,30 @@ DEFAULT_FLAT_RATE = 8.0
 
 # VAT registration threshold for individual taxpayers.
 VAT_THRESHOLD = 3000000.0
+
+
+def get_tax_table_values(data, prefix, taxable_income):
+    """Return automatic tax-table values with optional manual overrides."""
+    automatic = compute_graduated_breakdown(taxable_income)
+    basic_tax = safe_float(
+        data.get(f"{prefix}_basic_tax", automatic["base_tax"])
+    )
+    excess_amount = safe_float(
+        data.get(f"{prefix}_excess_amount", automatic["excess_amount"])
+    )
+    excess_rate = safe_float(
+        data.get(f"{prefix}_excess_rate", automatic["excess_rate"])
+    )
+
+    return {
+        "basic_tax": basic_tax,
+        "excess_amount": excess_amount,
+        "excess_rate": excess_rate,
+        "income_tax": round(
+            basic_tax + (excess_amount * (excess_rate / 100)),
+            2,
+        ),
+    }
 
 
 # ============================================================
@@ -95,8 +119,8 @@ def compute_osd(data):
     else:
         total_taxable = business_taxable
 
-    # Income tax from the graduated table.
-    income_tax = compute_graduated_tax(total_taxable)
+    tax_table = get_tax_table_values(data, "osd", total_taxable)
+    income_tax = tax_table["income_tax"]
 
     # Percentage tax rate. Defaults to 3 percent. The rate may
     # be reduced under special laws, so the frontend may
@@ -127,6 +151,9 @@ def compute_osd(data):
         "other_income": other_income,
         "business_taxable": business_taxable,
         "total_taxable_income": total_taxable,
+        "basic_tax": tax_table["basic_tax"],
+        "excess_amount": tax_table["excess_amount"],
+        "excess_rate": tax_table["excess_rate"],
         "income_tax": income_tax,
         "percentage_tax_rate": percentage_rate,
         "percentage_tax": percentage_tax,
@@ -199,8 +226,8 @@ def compute_itemized(data):
     else:
         total_taxable = business_taxable
 
-    # Income tax from the graduated table.
-    income_tax = compute_graduated_tax(total_taxable)
+    tax_table = get_tax_table_values(data, "itemized", total_taxable)
+    income_tax = tax_table["income_tax"]
 
     # Percentage tax rate. Defaults to 3 percent.
     percentage_rate = safe_float(
@@ -234,6 +261,9 @@ def compute_itemized(data):
         "other_income": other_income,
         "business_taxable": business_taxable,
         "total_taxable_income": total_taxable,
+        "basic_tax": tax_table["basic_tax"],
+        "excess_amount": tax_table["excess_amount"],
+        "excess_rate": tax_table["excess_rate"],
         "income_tax": income_tax,
         "percentage_tax_rate": percentage_rate,
         "percentage_tax": percentage_tax,
@@ -328,7 +358,12 @@ def compute_eight_percent(data):
 
     # Mixed income earner: compensation is taxed under the
     # graduated table, business income at 8 percent.
-    compensation_tax = compute_graduated_tax(compensation["taxable"])
+    compensation_table = get_tax_table_values(
+        data,
+        "compensation",
+        compensation["taxable"],
+    )
+    compensation_tax = compensation_table["income_tax"]
     business_tax = gross_income * (flat_rate / 100)
     total_tax = compensation_tax + business_tax
 
@@ -337,6 +372,9 @@ def compute_eight_percent(data):
         "is_mixed": True,
         "compensation": compensation,
         "compensation_tax": compensation_tax,
+        "basic_tax": compensation_table["basic_tax"],
+        "excess_amount": compensation_table["excess_amount"],
+        "excess_rate": compensation_table["excess_rate"],
         "sales": sales,
         "other_income": other_income,
         "gross_income": gross_income,
