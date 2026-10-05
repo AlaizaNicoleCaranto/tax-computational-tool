@@ -61,18 +61,39 @@ def compute_graduated_tax(taxable_income):
     if income <= 0:
         return 0.0
 
-    # Walk the bracket list and return the first match.
+    return compute_graduated_breakdown(taxable_income)["income_tax"]
+
+
+def compute_graduated_breakdown(taxable_income):
+    """Return the tax-table base, excess, rate, and calculated tax."""
+    try:
+        income = float(
+            str(taxable_income).replace(",", "").replace("₱", "").strip()
+        )
+    except (ValueError, TypeError):
+        income = 0.0
+
+    if income <= 0:
+        income = 0.0
+
+    # Walk the bracket list and expose the same values shown in the result UI.
     for upper, base_tax, rate, threshold in TAX_BRACKETS:
         if income <= upper:
-            # Tax is the base amount plus the rate applied to
-            # the portion of income above the threshold.
             excess = income - threshold
             if excess < 0:
                 excess = 0
-            tax = base_tax + (excess * rate)
-            return round(tax, 2)
+            if rate == 0:
+                excess = 0
+            return {
+                "base_tax": round(base_tax, 2),
+                "excess_amount": round(excess, 2),
+                "excess_rate": rate * 100,
+                "income_tax": round(base_tax + (excess * rate), 2),
+            }
 
-    # The loop always returns because the final bracket uses
-    # infinity as the upper limit. This fallback is unreachable
-    # but kept for safety.
-    return 0.0
+    return {
+        "base_tax": 0.0,
+        "excess_amount": 0.0,
+        "excess_rate": 0.0,
+        "income_tax": 0.0,
+    }

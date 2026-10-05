@@ -1,32 +1,34 @@
 {# ============================================================ PARTIAL:
-COMPENSATION INCOME (inside STEP 1)
+COMPENSATION INCOME (inside INCOME STEP 2)
 ============================================================ #}
 
-<div id="compensationSection" class="hidden">
-  <div class="section" style="border-top: 1px solid var(--color-border)">
-    <div class="section-title">Compensation Income</div>
+<div
+  id="compensationSection"
+  class="section hidden"
+  style="border-top: 1px solid var(--color-border)"
+>
+  <div class="section-title">Compensation Income</div>
 
-    <div class="info-box">
-      For mixed income earners, Gross Compensation Income (Item 19) and Total
-      Non-Taxable/Exempt Compensation Income (Item 20) are derived from the
-      applicable BIR Form No. 2316 entries.
+  <div class="info-box">
+    For mixed income earners, Gross Compensation Income (Item 19) and Total
+    Non-Taxable/Exempt Compensation Income (Item 20) are derived from the
+    applicable BIR Form No. 2316 entries.
+  </div>
+
+  <div class="input-grid" style="margin-top: 20px">
+    <div class="input-group">
+      <label>Gross Compensation Income</label>
+      <div class="input-box">
+        <span class="prefix">PHP</span>
+        <input type="text" id="grossComp" value="0" inputmode="decimal" />
+      </div>
     </div>
 
-    <div class="input-grid" style="margin-top: 20px">
-      <div class="input-group">
-        <label>Gross Compensation Income</label>
-        <div class="input-box">
-          <span class="prefix">PHP</span>
-          <input type="text" id="grossComp" value="0" inputmode="decimal" />
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label>Total Non-Taxable / Exempt Compensation</label>
-        <div class="input-box">
-          <span class="prefix">PHP</span>
-          <input type="text" id="nonTaxComp" value="0" inputmode="decimal" />
-        </div>
+    <div class="input-group">
+      <label>Total Non-Taxable / Exempt Compensation</label>
+      <div class="input-box">
+        <span class="prefix">PHP</span>
+        <input type="text" id="nonTaxComp" value="0" inputmode="decimal" />
       </div>
     </div>
   </div>

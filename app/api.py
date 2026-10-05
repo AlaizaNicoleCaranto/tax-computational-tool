@@ -125,6 +125,9 @@ def validate_tax_parameters(data):
         "osd_percentage",
         "percentage_tax_rate",
         "flat_rate",
+        "osd_excess_rate",
+        "itemized_excess_rate",
+        "compensation_excess_rate",
     )
 
     for field in percentage_fields:
@@ -152,6 +155,12 @@ def validate_tax_parameters(data):
         "accrual_sales",
         "cash_cost",
         "accrual_cost",
+        "osd_basic_tax",
+        "osd_excess_amount",
+        "itemized_basic_tax",
+        "itemized_excess_amount",
+        "compensation_basic_tax",
+        "compensation_excess_amount",
     )
 
     for field in amount_fields:
@@ -172,10 +181,36 @@ def validate_tax_parameters(data):
         for item in data.get(field, []):
             if not isinstance(item, dict):
                 return f"Entries in {field.replace('_', ' ')} must be objects."
+            try:
+                value = float(str(item.get("amount", 0)).replace(",", ""))
+            except (TypeError, ValueError):
+                return f"Amounts in {field.replace('_', ' ')} must be numeric."
+            if not math.isfinite(value) or value < 0:
+                return f"Amounts in {field.replace('_', ' ')} cannot be negative."
+
+    ordinary = data.get("ordinary_deductions", {})
+    if not isinstance(ordinary, dict):
+        return "Ordinary deductions must be an object."
+    for value in ordinary.values():
+        try:
+            numeric_value = float(str(value).replace(",", ""))
+        except (TypeError, ValueError):
+            return "Ordinary deduction amounts must be numeric."
+        if not math.isfinite(numeric_value) or numeric_value < 0:
+            return "Ordinary deduction amounts cannot be negative."
 
     for row in data.get("nolco", []):
         if not isinstance(row, dict):
             return "NOLCO entries must be objects."
+        for column in ("a", "b", "c", "d"):
+            try:
+                numeric_value = float(
+                    str(row.get(column, 0)).replace(",", "")
+                )
+            except (TypeError, ValueError):
+                return "NOLCO amounts must be numeric."
+            if not math.isfinite(numeric_value) or numeric_value < 0:
+                return "NOLCO amounts cannot be negative."
 
     return None
 

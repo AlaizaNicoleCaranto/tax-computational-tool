@@ -35,6 +35,22 @@ import {
     initializeWizard
 } from "./wizard.js";
 
+function loadCalculatorConfig() {
+    const config = document.getElementById("calculatorConfig");
+
+    if (!config) {
+        window.initialTaxFormState = null;
+        window.templateSourceId = null;
+        return;
+    }
+
+    const serializedInputs = config.dataset.initialInputs;
+    window.initialTaxFormState = serializedInputs
+        ? JSON.parse(serializedInputs)
+        : null;
+    window.templateSourceId = config.dataset.templateSourceId || null;
+}
+
 /* ============================================================
    DOM REFERENCES
    ============================================================ */
@@ -81,6 +97,7 @@ const dom = {
    ============================================================ */
 
 function initialize() {
+    loadCalculatorConfig();
     const initialState = window.initialTaxFormState || null;
 
     // 1. Attach the input formatter to every static numeric
