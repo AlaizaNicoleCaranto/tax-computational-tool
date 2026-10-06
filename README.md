@@ -1,6 +1,6 @@
-# Philippine Tax Computational Tool
+# Tax Computational Tool for Individual Taxpayers
 
-A web-based tool for estimating and comparing Philippine individual income tax computations. Create an account, enter taxpayer and business details, compare the available tax treatments, and save or export your results.
+A web-based tool for estimating and comparing Philippine individual income tax computations for individual taxpayers. Create an account, enter income, deductions, and business/professional details relevant to your filing status, compare the available tax treatments, and save or export your results.
 
 > **Disclaimer:** This application provides estimates for informational purposes only. It is not tax, legal, or accounting advice. Tax rules and eligibility can change; verify the applicable BIR guidance and consult a qualified tax professional before filing or making financial decisions.
 
