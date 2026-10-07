@@ -13,6 +13,17 @@ from dotenv import load_dotenv
 # modifying source code.
 load_dotenv()
 
+# Resolve the local SQLite database from the project location rather
+# than from the process working directory. This prevents different
+# launchers (Flask CLI, an IDE, or run.py) from opening different empty
+# tax_tool.db files.
+DEFAULT_SQLITE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "instance",
+    "tax_tool.db",
+)
+DEFAULT_SQLITE_URI = f"sqlite:///{DEFAULT_SQLITE_PATH}"
+
 
 class Config:
     """
@@ -35,7 +46,7 @@ class Config:
     # development. In production, this should be set to a
     # PostgreSQL URL via the DATABASE_URL environment variable.
     SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL", "sqlite:///tax_tool.db"
+        "DATABASE_URL", DEFAULT_SQLITE_URI
     )
 
     # Disable SQLAlchemy modification tracking to reduce memory
@@ -65,7 +76,7 @@ class DevelopmentConfig(Config):
 
     # Local SQLite database stored inside the instance folder.
     SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL", "sqlite:///tax_tool.db"
+        "DATABASE_URL", DEFAULT_SQLITE_URI
     )
 
 
@@ -84,10 +95,26 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SECURE = True
 
 
+class TestingConfig(Config):
+    """
+    Configuration for automated tests.
+
+    Uses an in-memory SQLite database so test runs never touch
+    or wipe the development database on disk.
+    """
+
+    TESTING = True
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    WTF_CSRF_ENABLED = False
+    SECRET_KEY = "test-secret"
+
+
 # Mapping used by the app factory to select a configuration
 # class based on the FLASK_ENV environment variable.
 config_by_name = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,
+    "testing": TestingConfig,
     "default": DevelopmentConfig,
 }

@@ -37,47 +37,25 @@ DEFAULT_FLAT_RATE = 8.0
 VAT_THRESHOLD = 3000000.0
 
 
-def get_tax_table_values(data, prefix, taxable_income):
-    """Return automatic tax-table values with optional manual overrides."""
-    automatic = compute_graduated_breakdown(taxable_income)
-
-    basic_tax_val = data.get(f"{prefix}_basic_tax")
-    if basic_tax_val is None or str(basic_tax_val).strip() == "":
-        basic_tax = automatic["base_tax"]
-        basic_tax_custom = False
-    else:
-        basic_tax = safe_float(basic_tax_val, automatic["base_tax"])
-        basic_tax_custom = True
-
-    excess_amount_val = data.get(f"{prefix}_excess_amount")
-    if excess_amount_val is None or str(excess_amount_val).strip() == "":
-        excess_amount = automatic["excess_amount"]
-        excess_amount_custom = False
-    else:
-        excess_amount = safe_float(excess_amount_val, automatic["excess_amount"])
-        excess_amount_custom = True
-
-    excess_rate_val = data.get(f"{prefix}_excess_rate")
-    if excess_rate_val is None or str(excess_rate_val).strip() == "":
-        excess_rate = automatic["excess_rate"]
-        excess_rate_custom = False
-    else:
-        excess_rate = safe_float(excess_rate_val, automatic["excess_rate"])
-        excess_rate_custom = True
-
-    income_tax = round(basic_tax + (excess_amount * (excess_rate / 100)), 2)
+def get_tax_table_values(data, prefix=None, taxable_income=None):
+    """
+    Return automatic tax-table values computed directly from the graduated tax table.
+    Manual overrides are not applied; computations are strictly based on the tax table.
+    """
+    income = data if taxable_income is None else taxable_income
+    automatic = compute_graduated_breakdown(income)
 
     return {
         "bracket_index": automatic.get("bracket_index", 1),
         "threshold": automatic.get("threshold", 0.0),
         "upper_amount": automatic.get("upper_amount"),
-        "basic_tax": basic_tax,
-        "excess_amount": excess_amount,
-        "excess_rate": excess_rate,
-        "income_tax": income_tax,
-        "basic_tax_custom": basic_tax_custom,
-        "excess_amount_custom": excess_amount_custom,
-        "excess_rate_custom": excess_rate_custom,
+        "basic_tax": automatic.get("base_tax", 0.0),
+        "excess_amount": automatic.get("excess_amount", 0.0),
+        "excess_rate": automatic.get("excess_rate", 0.0),
+        "income_tax": automatic.get("income_tax", 0.0),
+        "basic_tax_custom": False,
+        "excess_amount_custom": False,
+        "excess_rate_custom": False,
     }
 
 

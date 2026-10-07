@@ -114,7 +114,10 @@ def create_app(config_name=None):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        try:
+            return User.query.get(int(user_id))
+        except Exception:
+            return None
 
     # ========================================================
     # DATABASE INITIALIZATION
@@ -123,7 +126,7 @@ def create_app(config_name=None):
     # every startup.
 
     with app.app_context():
-        from app.models import TaxBracket
+        from app.models import User, Computation, TaxBracket
         from app.tax.graduated import TAX_BRACKETS
 
         db.create_all()

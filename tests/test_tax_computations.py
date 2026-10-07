@@ -165,6 +165,29 @@ class TestTaxComputations(unittest.TestCase):
         self.assertEqual(rec2["best_scheme"], "Scheme 2")
         self.assertEqual(rec2["best_tax"], 82500.0)
 
+    def test_tax_table_automatic_and_no_manual_overrides(self):
+        # Even if a payload tries to provide manual overrides for basic_tax or excess,
+        # they must be ignored and computed automatically from the tax table.
+        data = {
+            "taxpayer_type": "pure",
+            "cash_sales": "1,000,000",
+            "osd_percentage": 40,
+            "percentage_tax_rate": 3,
+            "osd_basic_tax": "999999",
+            "osd_excess_amount": "888888",
+            "osd_excess_rate": "50",
+        }
+        res = compute_osd(data)
+        # Sales = 1M, OSD 40% = 400k, Net Income = 600k (Bracket 3: 400k-800k)
+        # Tax table: base_tax = 22,500, excess_amount = 200,000, excess_rate = 20.0
+        self.assertEqual(res["basic_tax"], 22500.0)
+        self.assertEqual(res["excess_amount"], 200000.0)
+        self.assertEqual(res["excess_rate"], 20.0)
+        self.assertEqual(res["income_tax"], 62500.0)
+        self.assertFalse(res["basic_tax_custom"])
+        self.assertFalse(res["excess_amount_custom"])
+        self.assertFalse(res["excess_rate_custom"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -219,9 +219,9 @@ async function saveComputation() {
             );
         }
 
-        setTimeout(function () {
-            resetFormSilently();
-        }, AUTO_RESET_DELAY);
+        // Return to the dashboard after a successful save so the
+        // newly saved computation appears in the recent-computations list.
+        window.location.assign("/dashboard");
 
     } catch (error) {
         showToast(
@@ -425,18 +425,6 @@ export function attachEvents(domRefs) {
         }
     });
 
-    // Reset manual overrides back to automatic Tax Table computation
-    document.addEventListener("click", function (event) {
-        const resetBtn = event.target.closest("[data-reset-setting]");
-        if (resetBtn) {
-            const settingName = resetBtn.dataset.resetSetting;
-            const input = document.querySelector('[data-setting="' + settingName + '"]');
-            if (input) {
-                delete input.dataset.userModified;
-            }
-            computeOnly();
-        }
-    });
 
     // Modal for viewing BIR Tax Table from Step 4
     const openModalBtn = document.getElementById("openTaxTableModalBtn");

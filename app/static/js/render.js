@@ -72,9 +72,18 @@ function pesoRow(label, value, className) {
 }
 
 /**
+ * Format a tax rate percentage without trailing zeroes if integer,
+ * e.g., 20 -> "20", 15.5 -> "15.5", 0 -> "0".
+ */
+function formatRate(value) {
+    const num = Number(value) || 0;
+    return num % 1 === 0 ? num.toFixed(0) : num.toString();
+}
+
+/**
  * Build an editable numeric setting row for a tax scheme.
  */
-function settingRow(label, setting, value, suffix, prefix, isCustom) {
+function settingRow(label, setting, value, suffix, prefix) {
     const numericValue = Number(value);
     const inputValue = Number.isFinite(numericValue)
         ? numericValue
@@ -95,15 +104,9 @@ function settingRow(label, setting, value, suffix, prefix, isCustom) {
         '" ' +
         'data-setting="' + escapeHtml(setting) + '" ' +
         'value="' + escapeHtml(formatNumber(inputValue)) + '" ' +
-        (isCustom ? 'data-user-modified="true" ' : "") +
         'inputmode="decimal" autocomplete="off">' +
         (suffix
             ? '<span class="setting-suffix">' + escapeHtml(suffix) + "</span>"
-            : "") +
-        (isCustom
-            ? '<button type="button" class="btn-reset-setting" data-reset-setting="' +
-              escapeHtml(setting) +
-              '" title="Reset to Tax Table amount">↺</button>'
             : "") +
         "</span></div>"
     );
@@ -154,29 +157,17 @@ function renderOsd(result) {
         ));
     }
 
-    parts.push(settingRow(
+    parts.push(pesoRow(
         "Basic Amount based on Tax Table",
-        "osd_basic_tax",
-        result.basic_tax,
-        "",
-        "PHP",
-        result.basic_tax_custom
+        result.basic_tax
     ));
-    parts.push(settingRow(
+    parts.push(pesoRow(
         "Excess Amount",
-        "osd_excess_amount",
-        result.excess_amount,
-        "",
-        "PHP",
-        result.excess_amount_custom
+        result.excess_amount
     ));
-    parts.push(settingRow(
+    parts.push(row(
         "% of the Excess",
-        "osd_excess_rate",
-        result.excess_rate,
-        "%",
-        "",
-        result.excess_rate_custom
+        formatRate(result.excess_rate) + "%"
     ));
     parts.push(pesoRow("Income Tax Due", result.income_tax));
     parts.push(settingRow(
@@ -253,29 +244,17 @@ function renderItemized(result) {
         ));
     }
 
-    parts.push(settingRow(
+    parts.push(pesoRow(
         "Basic Amount based on Tax Table",
-        "itemized_basic_tax",
-        result.basic_tax,
-        "",
-        "PHP",
-        result.basic_tax_custom
+        result.basic_tax
     ));
-    parts.push(settingRow(
+    parts.push(pesoRow(
         "Excess Amount",
-        "itemized_excess_amount",
-        result.excess_amount,
-        "",
-        "PHP",
-        result.excess_amount_custom
+        result.excess_amount
     ));
-    parts.push(settingRow(
+    parts.push(row(
         "% of the Excess",
-        "itemized_excess_rate",
-        result.excess_rate,
-        "%",
-        "",
-        result.excess_rate_custom
+        formatRate(result.excess_rate) + "%"
     ));
     parts.push(pesoRow("Income Tax Due", result.income_tax));
     parts.push(settingRow(
@@ -314,29 +293,17 @@ function renderEight(result) {
             "Taxable Compensation",
             result.compensation.taxable
         ));
-        parts.push(settingRow(
+        parts.push(pesoRow(
             "Basic Amount based on Tax Table",
-            "compensation_basic_tax",
-            result.basic_tax,
-            "",
-            "PHP",
-            result.basic_tax_custom
+            result.basic_tax
         ));
-        parts.push(settingRow(
+        parts.push(pesoRow(
             "Excess Amount",
-            "compensation_excess_amount",
-            result.excess_amount,
-            "",
-            "PHP",
-            result.excess_amount_custom
+            result.excess_amount
         ));
-        parts.push(settingRow(
+        parts.push(row(
             "% of the Excess",
-            "compensation_excess_rate",
-            result.excess_rate,
-            "%",
-            "",
-            result.excess_rate_custom
+            formatRate(result.excess_rate) + "%"
         ));
         parts.push(pesoRow(
             "Compensation Tax Due",
