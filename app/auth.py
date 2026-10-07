@@ -6,6 +6,9 @@
 # registered with a single call in the app factory.
 
 import hashlib
+import smtplib
+import ssl
+from email.message import EmailMessage
 
 from flask import (
     Blueprint,
@@ -77,6 +80,53 @@ def _user_from_reset_token(token):
 
     marker = hashlib.sha256(user.password_hash.encode("utf-8")).hexdigest()
     return user if payload.get("password_marker") == marker else None
+
+
+def _send_password_reset_email(user, reset_url):
+    """Send a reset link through the configured SMTP server."""
+    server = current_app.config.get("MAIL_SERVER")
+    username = current_app.config.get("MAIL_USERNAME")
+    password = current_app.config.get("MAIL_PASSWORD")
+    sender = current_app.config.get("MAIL_FROM") or username
+    port = current_app.config.get("MAIL_PORT", 587)
+
+    if not server or not sender:
+        current_app.logger.warning(
+            "Password reset email not sent: SMTP is not configured."
+        )
+        return False
+
+    message = EmailMessage()
+    message["Subject"] = "Reset your Tax Computational Tool password"
+    message["From"] = sender
+    message["To"] = user.email
+    message.set_content(
+        f"Hello {user.full_name},\n\n"
+        "We received a request to reset your Tax Computational Tool password. "
+        "Use the link below within one hour:\n\n"
+        f"{reset_url}\n\n"
+        "If you did not request this, you can ignore this email."
+    )
+
+    try:
+        if current_app.config.get("MAIL_USE_TLS", True):
+            with smtplib.SMTP(server, port, timeout=20) as smtp:
+                smtp.starttls(context=ssl.create_default_context())
+                if username and password:
+                    smtp.login(username, password)
+                smtp.send_message(message)
+        else:
+            with smtplib.SMTP_SSL(
+                server, port, timeout=20, context=ssl.create_default_context()
+            ) as smtp:
+                if username and password:
+                    smtp.login(username, password)
+                smtp.send_message(message)
+    except (OSError, smtplib.SMTPException):
+        current_app.logger.exception("Password reset email could not be sent")
+        return False
+
+    return True
 
 
 # ============================================================
@@ -226,12 +276,22 @@ def forgot_password():
         if user:
             token = _password_reset_token(user)
             reset_url = url_for("auth.reset_password", token=token, _external=True)
-            current_app.logger.info("Password reset requested for %s", email)
 
-            # There is no mail provider configured in this project yet. Keep
-            # the link visible for local development and log it for deployment
-            # integration, without exposing account existence to the requester.
+            # Local development can continue directly to the reset form. In
+            # production, users receive the signed link by email instead.
             if current_app.debug:
+                return redirect(url_for("auth.reset_password", token=token))
+
+            email_sent = _send_password_reset_email(user, reset_url)
+            current_app.logger.info(
+                "Password reset requested for %s; email_sent=%s",
+                email,
+                email_sent,
+            )
+
+            # Keep a local fallback link visible when SMTP is not configured,
+            # without exposing account existence to the requester in production.
+            if current_app.debug and not email_sent:
                 flash(f"Development reset link: {reset_url}", "success")
 
         flash(

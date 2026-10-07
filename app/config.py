@@ -39,6 +39,15 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")
     ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "").strip().lower()
 
+    # SMTP settings used by password-reset emails. Configure these in the
+    # deployment environment; no credentials are stored in source control.
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "")
+    MAIL_PORT = int(os.getenv("MAIL_PORT", "587"))
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "true").lower() == "true"
+    MAIL_FROM = os.getenv("MAIL_FROM", "").strip()
+
     # Timezone used when displaying stored UTC timestamps to users.
     DISPLAY_TIMEZONE = os.getenv("APP_TIMEZONE", "Asia/Singapore")
 

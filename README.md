@@ -103,6 +103,12 @@ The application loads environment variables from the environment or a local `.en
 | --- | --- | --- |
 | `SECRET_KEY` | Signs session cookies and security tokens. Set a long, random value outside local development. | `dev-secret-change-me` |
 | `DATABASE_URL` | SQLAlchemy database connection URL. | SQLite database |
+| `MAIL_SERVER` | SMTP server used for password-reset emails. | Not configured |
+| `MAIL_PORT` | SMTP port. | `587` |
+| `MAIL_USERNAME` | SMTP login username. | Not configured |
+| `MAIL_PASSWORD` | SMTP login password or app password. | Not configured |
+| `MAIL_FROM` | Address shown as the sender. | `MAIL_USERNAME` |
+| `MAIL_USE_TLS` | Use STARTTLS for SMTP. Set `false` for SSL SMTP. | `true` |
 | `FLASK_ENV` | Selects the application configuration: `development` or `production`. | `development` |
 | `PORT` | Port used by `python run.py`. | `5001` |
 
@@ -111,6 +117,12 @@ For example, a local `.env` file can contain:
 ```dotenv
 FLASK_ENV=development
 SECRET_KEY=replace-with-a-long-random-secret
+MAIL_SERVER=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@example.com
+MAIL_PASSWORD=your-app-password
+MAIL_FROM=your-email@example.com
+MAIL_USE_TLS=true
 # Optional: leave unset to use the default SQLite database.
 # DATABASE_URL=postgresql://username:password@host:5432/database
 ```
