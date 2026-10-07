@@ -71,50 +71,55 @@ export function attachInputFormatter(input) {
         return;
     }
 
-    // Clear the default zero when the field is focused.
+    if (input.dataset.formatterAttached === "true") {
+        return;
+    }
+    input.dataset.formatterAttached = "true";
+
+    // Clean value on focus so user can type millions without decimal trapping
     input.addEventListener("focus", function () {
-        if (this.value === "0" || this.value === "0.00") {
+        if (this.dataset.restoringFocus === "true") {
+            delete this.dataset.restoringFocus;
+            return;
+        }
+
+        const val = parseNumber(this.value);
+        if (val === 0) {
             this.value = "";
+        } else {
+            const raw = String(this.value).replace(/,/g, "").trim();
+            if (raw.endsWith(".00")) {
+                this.value = raw.slice(0, -3);
+            } else if (!raw.includes(".")) {
+                this.value = raw;
+            }
         }
         this.select();
     });
 
-    // Restore a "0" if the user leaves the field empty.
+    // Format with thousand separators and two decimals on blur
     input.addEventListener("blur", function () {
-        if (this.value.trim() === "") {
-            this.value = "0";
+        const raw = this.value.trim();
+        if (raw === "") {
+            this.value = "0.00";
+        } else {
+            const num = parseNumber(raw);
+            this.value = formatNumber(num);
         }
     });
 
+    // Allow typing numbers and a single decimal point freely
     input.addEventListener("input", function () {
-        const cursorPosition = this.selectionStart;
-        const originalLength = this.value.length;
-
-        // Strip everything except digits and a single dot.
         let raw = this.value.replace(/[^\d.]/g, "");
-
-        // Collapse multiple dots into one.
         const parts = raw.split(".");
         if (parts.length > 2) {
             raw = parts[0] + "." + parts.slice(1).join("");
         }
-
-        // Rebuild the formatted value.
-        const hasDot = raw.includes(".");
-        const integerPart = raw.split(".")[0] || "0";
-        const decimalPart = hasDot ? "." + (raw.split(".")[1] || "") : "";
-
-        this.value =
-            parseFloat(integerPart).toLocaleString("en-US") +
-            decimalPart;
-
-        // Restore the cursor position as best as possible.
-        const newLength = this.value.length;
-        const delta = newLength - originalLength;
-        this.setSelectionRange(
-            cursorPosition + delta,
-            cursorPosition + delta
-        );
+        if (this.value !== raw) {
+            const pos = this.selectionStart;
+            this.value = raw;
+            this.setSelectionRange(pos, pos);
+        }
     });
 }
 

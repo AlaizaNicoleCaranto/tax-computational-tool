@@ -40,24 +40,44 @@ VAT_THRESHOLD = 3000000.0
 def get_tax_table_values(data, prefix, taxable_income):
     """Return automatic tax-table values with optional manual overrides."""
     automatic = compute_graduated_breakdown(taxable_income)
-    basic_tax = safe_float(
-        data.get(f"{prefix}_basic_tax", automatic["base_tax"])
-    )
-    excess_amount = safe_float(
-        data.get(f"{prefix}_excess_amount", automatic["excess_amount"])
-    )
-    excess_rate = safe_float(
-        data.get(f"{prefix}_excess_rate", automatic["excess_rate"])
-    )
+
+    basic_tax_val = data.get(f"{prefix}_basic_tax")
+    if basic_tax_val is None or str(basic_tax_val).strip() == "":
+        basic_tax = automatic["base_tax"]
+        basic_tax_custom = False
+    else:
+        basic_tax = safe_float(basic_tax_val, automatic["base_tax"])
+        basic_tax_custom = True
+
+    excess_amount_val = data.get(f"{prefix}_excess_amount")
+    if excess_amount_val is None or str(excess_amount_val).strip() == "":
+        excess_amount = automatic["excess_amount"]
+        excess_amount_custom = False
+    else:
+        excess_amount = safe_float(excess_amount_val, automatic["excess_amount"])
+        excess_amount_custom = True
+
+    excess_rate_val = data.get(f"{prefix}_excess_rate")
+    if excess_rate_val is None or str(excess_rate_val).strip() == "":
+        excess_rate = automatic["excess_rate"]
+        excess_rate_custom = False
+    else:
+        excess_rate = safe_float(excess_rate_val, automatic["excess_rate"])
+        excess_rate_custom = True
+
+    income_tax = round(basic_tax + (excess_amount * (excess_rate / 100)), 2)
 
     return {
+        "bracket_index": automatic.get("bracket_index", 1),
+        "threshold": automatic.get("threshold", 0.0),
+        "upper_amount": automatic.get("upper_amount"),
         "basic_tax": basic_tax,
         "excess_amount": excess_amount,
         "excess_rate": excess_rate,
-        "income_tax": round(
-            basic_tax + (excess_amount * (excess_rate / 100)),
-            2,
-        ),
+        "income_tax": income_tax,
+        "basic_tax_custom": basic_tax_custom,
+        "excess_amount_custom": excess_amount_custom,
+        "excess_rate_custom": excess_rate_custom,
     }
 
 
@@ -154,6 +174,12 @@ def compute_osd(data):
         "basic_tax": tax_table["basic_tax"],
         "excess_amount": tax_table["excess_amount"],
         "excess_rate": tax_table["excess_rate"],
+        "basic_tax_custom": tax_table["basic_tax_custom"],
+        "excess_amount_custom": tax_table["excess_amount_custom"],
+        "excess_rate_custom": tax_table["excess_rate_custom"],
+        "bracket_index": tax_table["bracket_index"],
+        "threshold": tax_table["threshold"],
+        "upper_amount": tax_table["upper_amount"],
         "income_tax": income_tax,
         "percentage_tax_rate": percentage_rate,
         "percentage_tax": percentage_tax,
@@ -264,6 +290,12 @@ def compute_itemized(data):
         "basic_tax": tax_table["basic_tax"],
         "excess_amount": tax_table["excess_amount"],
         "excess_rate": tax_table["excess_rate"],
+        "basic_tax_custom": tax_table["basic_tax_custom"],
+        "excess_amount_custom": tax_table["excess_amount_custom"],
+        "excess_rate_custom": tax_table["excess_rate_custom"],
+        "bracket_index": tax_table["bracket_index"],
+        "threshold": tax_table["threshold"],
+        "upper_amount": tax_table["upper_amount"],
         "income_tax": income_tax,
         "percentage_tax_rate": percentage_rate,
         "percentage_tax": percentage_tax,
@@ -375,6 +407,12 @@ def compute_eight_percent(data):
         "basic_tax": compensation_table["basic_tax"],
         "excess_amount": compensation_table["excess_amount"],
         "excess_rate": compensation_table["excess_rate"],
+        "basic_tax_custom": compensation_table["basic_tax_custom"],
+        "excess_amount_custom": compensation_table["excess_amount_custom"],
+        "excess_rate_custom": compensation_table["excess_rate_custom"],
+        "bracket_index": compensation_table["bracket_index"],
+        "threshold": compensation_table["threshold"],
+        "upper_amount": compensation_table["upper_amount"],
         "sales": sales,
         "other_income": other_income,
         "gross_income": gross_income,

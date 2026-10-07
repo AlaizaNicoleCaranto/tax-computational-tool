@@ -31,6 +31,34 @@ TAX_BRACKETS = (
 )
 
 
+def get_tax_brackets():
+    """Read active database brackets, falling back to built-in defaults."""
+    try:
+        from app.models import TaxBracket
+
+        rows = (
+            TaxBracket.query
+            .filter_by(is_active=True)
+            .order_by(TaxBracket.threshold.asc())
+            .all()
+        )
+    except Exception:
+        rows = []
+
+    if not rows:
+        return TAX_BRACKETS
+
+    return tuple(
+        (
+            row.upper_amount if row.upper_amount is not None else float("inf"),
+            row.base_tax,
+            row.rate,
+            row.threshold,
+        )
+        for row in rows
+    )
+
+
 def compute_graduated_tax(taxable_income):
     """
     Compute the graduated income tax due for the given taxable
@@ -77,14 +105,18 @@ def compute_graduated_breakdown(taxable_income):
         income = 0.0
 
     # Walk the bracket list and expose the same values shown in the result UI.
-    for upper, base_tax, rate, threshold in TAX_BRACKETS:
+    brackets = get_tax_brackets()
+    for index, (upper, base_tax, rate, threshold) in enumerate(brackets):
         if income <= upper:
             excess = income - threshold
             if excess < 0:
-                excess = 0
+                excess = 0.0
             if rate == 0:
-                excess = 0
+                excess = 0.0
             return {
+                "bracket_index": index + 1,
+                "threshold": threshold,
+                "upper_amount": upper if upper != float("inf") else None,
                 "base_tax": round(base_tax, 2),
                 "excess_amount": round(excess, 2),
                 "excess_rate": rate * 100,
@@ -92,6 +124,9 @@ def compute_graduated_breakdown(taxable_income):
             }
 
     return {
+        "bracket_index": len(brackets),
+        "threshold": 0.0,
+        "upper_amount": None,
         "base_tax": 0.0,
         "excess_amount": 0.0,
         "excess_rate": 0.0,

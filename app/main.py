@@ -14,20 +14,39 @@
 from flask import (
     Blueprint,
     abort,
+    current_app,
     flash,
     redirect,
     render_template,
+    request,
     url_for,
 )
 
 from flask_login import current_user, login_required
 
 from app import db
-from app.models import Computation
+from app.models import Computation, TaxBracket
 
 # Blueprint definition with an empty URL prefix so that the
 # dashboard lives at the site root.
 main_bp = Blueprint("main", __name__)
+
+
+def is_tax_admin():
+    """Return whether the signed-in user may edit tax rules."""
+    admin_email = current_app.config.get("ADMIN_EMAIL", "").strip().lower()
+    if not admin_email:
+        # Default: all authenticated users can view and edit the tax table
+        return current_user.is_authenticated
+    return (
+        current_user.is_authenticated
+        and current_user.email.lower() == admin_email
+    )
+
+
+@main_bp.app_context_processor
+def inject_admin_status():
+    return dict(is_tax_admin=is_tax_admin())
 
 
 # ============================================================
@@ -45,7 +64,13 @@ def index():
     the /api/calculate endpoint so that this route stays a
     simple render.
     """
-    return render_template("index.html")
+    tax_brackets = (
+        TaxBracket.query
+        .filter_by(is_active=True)
+        .order_by(TaxBracket.threshold.asc())
+        .all()
+    )
+    return render_template("index.html", tax_brackets=tax_brackets)
 
 
 @main_bp.route("/dashboard")
@@ -70,6 +95,187 @@ def dashboard():
     )
 
 
+@main_bp.route("/tax-table", methods=["GET", "POST"])
+@login_required
+def tax_table():
+    """Display and update the active graduated tax table."""
+    is_admin = is_tax_admin()
+
+    if request.method == "POST":
+        if not is_admin:
+            abort(403)
+        action = request.form.get("action", "save")
+
+        # Action 1: Reset to official BIR TRAIN Law defaults from image
+        if action == "reset_defaults":
+            from app.tax.graduated import TAX_BRACKETS
+
+            TaxBracket.query.delete()
+            for upper, base_tax, rate, threshold in TAX_BRACKETS:
+                db.session.add(
+                    TaxBracket(
+                        tax_year="2023 onwards (TRAIN Law)",
+                        over_amount=None if threshold == 0 else threshold,
+                        upper_amount=None if upper == float("inf") else upper,
+                        base_tax=base_tax,
+                        rate=rate,
+                        threshold=threshold,
+                        is_active=True,
+                    )
+                )
+            db.session.commit()
+            flash(
+                "Tax table reset to official BIR TRAIN Law defaults.",
+                "success",
+            )
+            return redirect(url_for("main.tax_table"))
+
+        tax_year = (
+            request.form.get("tax_year", "").strip()
+            or "2023 onwards (TRAIN Law)"
+        )
+
+        thresholds = request.form.getlist("threshold[]")
+        upper_amounts = request.form.getlist("upper_amount[]")
+        base_taxes = request.form.getlist("base_tax[]")
+        rates = request.form.getlist("rate[]")
+
+        # Support dynamic multi-row form submission
+        if thresholds:
+            try:
+                new_brackets = []
+                for i in range(len(thresholds)):
+                    thresh_str = str(thresholds[i]).replace(",", "").strip()
+                    thresh = float(thresh_str) if thresh_str else 0.0
+
+                    upper_str = (
+                        str(upper_amounts[i]).replace(",", "").strip()
+                        if i < len(upper_amounts)
+                        else ""
+                    )
+                    upper = float(upper_str) if upper_str else None
+
+                    btax_str = (
+                        str(base_taxes[i]).replace(",", "").strip()
+                        if i < len(base_taxes)
+                        else "0"
+                    )
+                    btax = float(btax_str) if btax_str else 0.0
+
+                    rate_str = (
+                        str(rates[i]).replace(",", "").strip()
+                        if i < len(rates)
+                        else "0"
+                    )
+                    r = (float(rate_str) / 100) if rate_str else 0.0
+
+                    if thresh < 0 or btax < 0 or r < 0 or r > 1:
+                        raise ValueError(
+                            "Negative amounts or rates outside 0-100% are not allowed."
+                        )
+                    if upper is not None and upper <= thresh:
+                        raise ValueError(
+                            f"Bracket {i+1}: 'But Not Over' ({upper:,.2f}) must be greater than 'Over' ({thresh:,.2f})."
+                        )
+
+                    new_brackets.append(
+                        {
+                            "tax_year": tax_year,
+                            "threshold": thresh,
+                            "upper_amount": upper,
+                            "base_tax": btax,
+                            "rate": r,
+                            "over_amount": thresh or None,
+                            "is_active": True,
+                        }
+                    )
+
+                if not new_brackets:
+                    raise ValueError("At least one tax bracket is required.")
+
+                new_brackets.sort(key=lambda b: b["threshold"])
+
+                TaxBracket.query.delete()
+                for b_data in new_brackets:
+                    db.session.add(TaxBracket(**b_data))
+                db.session.commit()
+                flash(
+                    "Tax table updated successfully. New computations will use these values.",
+                    "success",
+                )
+            except ValueError as e:
+                db.session.rollback()
+                flash(str(e), "error")
+            except Exception:
+                db.session.rollback()
+                flash("Please enter valid numeric tax-table values.", "error")
+
+            return redirect(url_for("main.tax_table"))
+
+        # Fallback to single bracket ID inputs if older form submitted
+        brackets = (
+            TaxBracket.query.filter_by(is_active=True)
+            .order_by(TaxBracket.threshold.asc())
+            .all()
+        )
+        try:
+            for bracket in brackets:
+                bracket.tax_year = tax_year
+                bracket.base_tax = float(
+                    request.form[f"base_tax_{bracket.id}"].replace(",", "")
+                )
+                bracket.rate = (
+                    float(request.form[f"rate_{bracket.id}"].replace(",", ""))
+                    / 100
+                )
+                bracket.threshold = float(
+                    request.form[f"threshold_{bracket.id}"].replace(",", "")
+                )
+
+                upper_value = request.form.get(
+                    f"upper_amount_{bracket.id}", ""
+                ).replace(",", "").strip()
+                bracket.upper_amount = (
+                    float(upper_value) if upper_value else None
+                )
+                bracket.over_amount = bracket.threshold or None
+
+                if (
+                    bracket.base_tax < 0
+                    or bracket.threshold < 0
+                    or bracket.rate < 0
+                    or bracket.rate > 1
+                    or (
+                        bracket.upper_amount is not None
+                        and bracket.upper_amount <= bracket.threshold
+                    )
+                ):
+                    raise ValueError
+
+            db.session.commit()
+            flash(
+                "Tax table updated. New computations will use these values.",
+                "success",
+            )
+        except Exception:
+            db.session.rollback()
+            flash("Please enter valid, ascending tax-table values.", "error")
+
+        return redirect(url_for("main.tax_table"))
+
+    brackets = (
+        TaxBracket.query.filter_by(is_active=True)
+        .order_by(TaxBracket.threshold.asc())
+        .all()
+    )
+    return render_template(
+        "tax_table.html",
+        brackets=brackets,
+        is_admin=is_admin,
+    )
+
+
+
 @main_bp.route("/edit/<int:computation_id>")
 @login_required
 def edit(computation_id):
@@ -82,10 +288,17 @@ def edit(computation_id):
     if computation is None:
         abort(404)
 
+    tax_brackets = (
+        TaxBracket.query.filter_by(is_active=True)
+        .order_by(TaxBracket.threshold.asc())
+        .all()
+    )
+
     return render_template(
         "index.html",
         initial_inputs=computation.inputs,
         template_source_id=computation.id,
+        tax_brackets=tax_brackets,
     )
 
 

@@ -46,7 +46,7 @@
     <div class="recent-item">
       <div>
         <a class="recent-name" href="{{ url_for('main.view', computation_id=computation.id) }}">{{ computation.inputs.get('computation_title', 'Untitled computation') }}</a>
-        <div class="recent-meta">{{ computation.created_at.strftime('%b %d, %Y %I:%M %p') }} · {{ computation.best_scheme }}</div>
+        <div class="recent-meta">{{ computation.created_at|local_datetime('%b %d, %Y %I:%M %p') }} · {{ computation.best_scheme }}</div>
       </div>
       <div class="recent-tax">PHP {{ '{:,.2f}'.format(computation.best_tax or 0) }}</div>
     </div>

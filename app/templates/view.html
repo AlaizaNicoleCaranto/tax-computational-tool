@@ -143,7 +143,7 @@ Tax Computational Tool{% endblock %} {% block extra_css %}
   <div>
     <h1>{{ computation.inputs.get('computation_title', 'Untitled computation') }}</h1>
     <div class="meta">
-      Computation #{{ computation.id }} · Saved on {{ computation.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+      Computation #{{ computation.id }} · Saved on {{ computation.created_at|local_datetime('%B %d, %Y at %I:%M %p') }}
     </div>
     {% if computation.inputs.get('computation_note') %}
     <div class="meta">Note: {{ computation.inputs.get('computation_note') }}</div>
@@ -220,6 +220,20 @@ Tax Computational Tool{% endblock %} {% block extra_css %}
         >PHP {{ '{:,.2f}'.format(osd.total_taxable_income) }}</span
       >
     </div>
+    {% if osd.basic_tax is defined and osd.basic_tax is not none %}
+    <div class="compute-row">
+      <span>Basic Amount based on Tax Table</span>
+      <span class="amount">PHP {{ '{:,.2f}'.format(osd.basic_tax) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>Excess Amount</span>
+      <span class="amount">PHP {{ '{:,.2f}'.format(osd.excess_amount) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>% of the Excess</span>
+      <span class="amount">{{ '{:g}'.format(osd.excess_rate) }}%</span>
+    </div>
+    {% endif %}
     <div class="compute-row">
       <span>Income Tax Due</span
       ><span class="amount">PHP {{ '{:,.2f}'.format(osd.income_tax) }}</span>
@@ -320,6 +334,20 @@ Tax Computational Tool{% endblock %} {% block extra_css %}
         >PHP {{ '{:,.2f}'.format(itemized.total_taxable_income) }}</span
       >
     </div>
+    {% if itemized.basic_tax is defined and itemized.basic_tax is not none %}
+    <div class="compute-row">
+      <span>Basic Amount based on Tax Table</span>
+      <span class="amount">PHP {{ '{:,.2f}'.format(itemized.basic_tax) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>Excess Amount</span>
+      <span class="amount">PHP {{ '{:,.2f}'.format(itemized.excess_amount) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>% of the Excess</span>
+      <span class="amount">{{ '{:g}'.format(itemized.excess_rate) }}%</span>
+    </div>
+    {% endif %}
     <div class="compute-row">
       <span>Income Tax Due</span
       ><span class="amount"
@@ -368,6 +396,20 @@ Tax Computational Tool{% endblock %} {% block extra_css %}
         >PHP {{ '{:,.2f}'.format(eight.compensation.taxable) }}</span
       >
     </div>
+    {% if eight.basic_tax is defined and eight.basic_tax is not none %}
+    <div class="compute-row">
+      <span>Basic Amount based on Tax Table</span>
+      <span class="amount">PHP {{ '{:,.2f}'.format(eight.basic_tax) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>Excess Amount</span>
+      <span class="amount">PHP {{ '{:,.2f}'.format(eight.excess_amount) }}</span>
+    </div>
+    <div class="compute-row">
+      <span>% of the Excess</span>
+      <span class="amount">{{ '{:g}'.format(eight.excess_rate) }}%</span>
+    </div>
+    {% endif %}
     <div class="compute-row">
       <span>Compensation Tax Due</span
       ><span class="amount"

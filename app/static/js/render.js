@@ -9,7 +9,11 @@
    render functions exported at the bottom.
    ============================================================ */
 
-import { formatNumber, formatPeso } from "./utils.js";
+import {
+    attachInputFormatter,
+    formatNumber,
+    formatPeso
+} from "./utils.js";
 
 /* ============================================================
    PRIMITIVES
@@ -70,28 +74,38 @@ function pesoRow(label, value, className) {
 /**
  * Build an editable numeric setting row for a tax scheme.
  */
-function settingRow(label, setting, value, suffix, prefix) {
+function settingRow(label, setting, value, suffix, prefix, isCustom) {
     const numericValue = Number(value);
     const inputValue = Number.isFinite(numericValue)
         ? numericValue
         : 0;
+    const isAmount = prefix === "PHP";
 
     return (
         '<div class="compute-row result-setting">' +
-        "<span>" + escapeHtml(label) + "</span>" +
+        '<span class="setting-label">' + escapeHtml(label) + "</span>" +
         '<span class="setting-control">' +
-                (prefix
-                        ? '<span class="setting-prefix">' +
-                            escapeHtml(prefix) +
-                            "</span>"
-                        : "") +
-        '<input type="number" class="setting-input" ' +
+        (prefix
+            ? '<span class="setting-prefix">' +
+              escapeHtml(prefix) +
+              "</span>"
+            : "") +
+        '<input type="text" class="setting-input ' +
+        (isAmount ? "setting-amount" : "setting-rate") +
+        '" ' +
         'data-setting="' + escapeHtml(setting) + '" ' +
-        'value="' + escapeHtml(inputValue) + '" ' +
-        'min="0" step="0.01" inputmode="decimal">' +
-        '<span class="setting-suffix">' +
-        escapeHtml(suffix) +
-        "</span></span></div>"
+        'value="' + escapeHtml(formatNumber(inputValue)) + '" ' +
+        (isCustom ? 'data-user-modified="true" ' : "") +
+        'inputmode="decimal" autocomplete="off">' +
+        (suffix
+            ? '<span class="setting-suffix">' + escapeHtml(suffix) + "</span>"
+            : "") +
+        (isCustom
+            ? '<button type="button" class="btn-reset-setting" data-reset-setting="' +
+              escapeHtml(setting) +
+              '" title="Reset to Tax Table amount">↺</button>'
+            : "") +
+        "</span></div>"
     );
 }
 
@@ -145,20 +159,24 @@ function renderOsd(result) {
         "osd_basic_tax",
         result.basic_tax,
         "",
-        "PHP"
+        "PHP",
+        result.basic_tax_custom
     ));
     parts.push(settingRow(
         "Excess Amount",
         "osd_excess_amount",
         result.excess_amount,
         "",
-        "PHP"
+        "PHP",
+        result.excess_amount_custom
     ));
     parts.push(settingRow(
         "% of the Excess",
         "osd_excess_rate",
         result.excess_rate,
-        "%"
+        "%",
+        "",
+        result.excess_rate_custom
     ));
     parts.push(pesoRow("Income Tax Due", result.income_tax));
     parts.push(settingRow(
@@ -169,7 +187,7 @@ function renderOsd(result) {
     ));
     parts.push(pesoRow("Percentage Tax Due", result.percentage_tax));
     parts.push(row(
-        "TOTAL TAX DUES",
+        "TOTAL TAX DUE",
         formatPeso(result.total_tax),
         "total"
     ));
@@ -240,20 +258,24 @@ function renderItemized(result) {
         "itemized_basic_tax",
         result.basic_tax,
         "",
-        "PHP"
+        "PHP",
+        result.basic_tax_custom
     ));
     parts.push(settingRow(
         "Excess Amount",
         "itemized_excess_amount",
         result.excess_amount,
         "",
-        "PHP"
+        "PHP",
+        result.excess_amount_custom
     ));
     parts.push(settingRow(
         "% of the Excess",
         "itemized_excess_rate",
         result.excess_rate,
-        "%"
+        "%",
+        "",
+        result.excess_rate_custom
     ));
     parts.push(pesoRow("Income Tax Due", result.income_tax));
     parts.push(settingRow(
@@ -264,7 +286,7 @@ function renderItemized(result) {
     ));
     parts.push(pesoRow("Percentage Tax Due", result.percentage_tax));
     parts.push(row(
-        "TOTAL TAX DUES",
+        "TOTAL TAX DUE",
         formatPeso(result.total_tax),
         "total"
     ));
@@ -297,20 +319,24 @@ function renderEight(result) {
             "compensation_basic_tax",
             result.basic_tax,
             "",
-            "PHP"
+            "PHP",
+            result.basic_tax_custom
         ));
         parts.push(settingRow(
             "Excess Amount",
             "compensation_excess_amount",
             result.excess_amount,
             "",
-            "PHP"
+            "PHP",
+            result.excess_amount_custom
         ));
         parts.push(settingRow(
             "% of the Excess",
             "compensation_excess_rate",
             result.excess_rate,
-            "%"
+            "%",
+            "",
+            result.excess_rate_custom
         ));
         parts.push(pesoRow(
             "Compensation Tax Due",
@@ -325,9 +351,11 @@ function renderEight(result) {
             "Gross Income / Taxable Income",
             result.gross_income
         ));
-        parts.push(row(
-            "Tax Rate (" + formatNumber(result.flat_rate) + "%)",
-            formatPeso(result.business_tax)
+        parts.push(settingRow(
+            "Tax Rate",
+            "flat_rate",
+            result.flat_rate,
+            "%"
         ));
     } else {
         parts.push(pesoRow("Sales / Receipts", result.sales));
@@ -344,7 +372,8 @@ function renderEight(result) {
             "Standard Deduction",
             "standard_deduction",
             result.standard_deduction,
-            ""
+            "",
+            "PHP"
         ));
         parts.push(pesoRow(
             "Taxable Income",
@@ -372,7 +401,7 @@ function renderEight(result) {
     }
 
     parts.push(row(
-        "TOTAL TAX DUES",
+        "TOTAL TAX DUE",
         formatPeso(result.total_tax),
         "total"
     ));
@@ -415,6 +444,32 @@ export function renderResults(results, dom) {
         return;
     }
 
+    const activeElement = document.activeElement;
+    const isEditingSetting = activeElement &&
+        activeElement.classList &&
+        activeElement.classList.contains("setting-input");
+    const activeSetting = isEditingSetting
+        ? activeElement.dataset.setting
+        : null;
+    const activeValue = isEditingSetting ? activeElement.value : null;
+    const activeUserModified = isEditingSetting &&
+        activeElement.dataset.userModified === "true";
+    const activeSettingInputs = activeSetting
+        ? Array.from(document.querySelectorAll(".setting-input"))
+            .filter(function (input) {
+                return input.dataset.setting === activeSetting;
+            })
+        : [];
+    const activeSettingIndex = activeSettingInputs.indexOf(activeElement);
+    const selectionStart = activeElement &&
+        typeof activeElement.selectionStart === "number"
+        ? activeElement.selectionStart
+        : null;
+    const selectionEnd = activeElement &&
+        typeof activeElement.selectionEnd === "number"
+        ? activeElement.selectionEnd
+        : null;
+
     if (dom.osdResult) {
         dom.osdResult.innerHTML = renderOsd(results.osd);
     }
@@ -425,6 +480,37 @@ export function renderResults(results, dom) {
 
     if (dom.eightResult) {
         dom.eightResult.innerHTML = renderEight(results.eight);
+    }
+
+    document
+        .querySelectorAll(".setting-input")
+        .forEach(attachInputFormatter);
+
+    if (activeSetting) {
+        const replacementInputs = Array.from(
+            document.querySelectorAll(".setting-input")
+        ).filter(function (input) {
+            return input.dataset.setting === activeSetting;
+        });
+        const replacement = replacementInputs[
+            activeSettingIndex >= 0 ? activeSettingIndex : 0
+        ];
+
+        if (replacement) {
+            if (activeValue !== null) {
+                replacement.value = activeValue;
+                if (activeUserModified) {
+                    replacement.dataset.userModified = "true";
+                }
+            }
+            replacement.dataset.restoringFocus = "true";
+            replacement.focus();
+            const end = replacement.value.length;
+            replacement.setSelectionRange(
+                Math.min(selectionStart === null ? end : selectionStart, end),
+                Math.min(selectionEnd === null ? end : selectionEnd, end)
+            );
+        }
     }
 
     if (dom.bestScheme) {

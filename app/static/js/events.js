@@ -401,6 +401,10 @@ export function attachEvents(domRefs) {
                 });
         }
 
+        if (target.classList.contains("setting-input")) {
+            target.dataset.userModified = "true";
+        }
+
         const dynamicClasses = [
             "ordinary-deduction",
             "other-income",
@@ -420,6 +424,45 @@ export function attachEvents(domRefs) {
             autoCompute();
         }
     });
+
+    // Reset manual overrides back to automatic Tax Table computation
+    document.addEventListener("click", function (event) {
+        const resetBtn = event.target.closest("[data-reset-setting]");
+        if (resetBtn) {
+            const settingName = resetBtn.dataset.resetSetting;
+            const input = document.querySelector('[data-setting="' + settingName + '"]');
+            if (input) {
+                delete input.dataset.userModified;
+            }
+            computeOnly();
+        }
+    });
+
+    // Modal for viewing BIR Tax Table from Step 4
+    const openModalBtn = document.getElementById("openTaxTableModalBtn");
+    const modalOverlay = document.getElementById("taxTableModal");
+    const closeModalBtn = document.getElementById("closeTaxTableModalBtn");
+    const closeModalFooterBtn = document.getElementById("closeTaxTableModalFooterBtn");
+
+    if (openModalBtn && modalOverlay) {
+        openModalBtn.addEventListener("click", function () {
+            modalOverlay.style.display = "flex";
+        });
+    }
+    [closeModalBtn, closeModalFooterBtn].forEach(function (btn) {
+        if (btn && modalOverlay) {
+            btn.addEventListener("click", function () {
+                modalOverlay.style.display = "none";
+            });
+        }
+    });
+    if (modalOverlay) {
+        modalOverlay.addEventListener("click", function (e) {
+            if (e.target === modalOverlay) {
+                modalOverlay.style.display = "none";
+            }
+        });
+    }
 
     const handlers = buildRowHandlers();
 

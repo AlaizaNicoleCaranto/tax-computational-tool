@@ -112,6 +112,17 @@ def build_scheme_rows(result):
                 "Total Taxable Income",
                 result["total_taxable_income"],
             ),
+        ])
+        if result.get("basic_tax") is not None:
+            rows.extend([
+                ("Basic Tax (Tax Table)", result["basic_tax"]),
+                ("Excess Amount", result["excess_amount"]),
+                (
+                    f"% of Excess ({result.get('excess_rate', 0):g}%)",
+                    round(result["excess_amount"] * (result.get("excess_rate", 0) / 100), 2),
+                ),
+            ])
+        rows.extend([
             ("Income Tax Due", result["income_tax"]),
             (
                 f"Percentage Tax ({result['percentage_tax_rate']:.2f}%)",
@@ -151,6 +162,17 @@ def build_scheme_rows(result):
                 "Total Taxable Income",
                 result["total_taxable_income"],
             ),
+        ])
+        if result.get("basic_tax") is not None:
+            rows.extend([
+                ("Basic Tax (Tax Table)", result["basic_tax"]),
+                ("Excess Amount", result["excess_amount"]),
+                (
+                    f"% of Excess ({result.get('excess_rate', 0):g}%)",
+                    round(result["excess_amount"] * (result.get("excess_rate", 0) / 100), 2),
+                ),
+            ])
+        rows.extend([
             ("Income Tax Due", result["income_tax"]),
             (
                 f"Percentage Tax ({result['percentage_tax_rate']:.2f}%)",
@@ -162,6 +184,15 @@ def build_scheme_rows(result):
     # Scheme 3: Optional 8 percent.
     else:
         if result.get("is_mixed"):
+            if result.get("basic_tax") is not None:
+                rows.extend([
+                    ("Basic Tax (Tax Table)", result["basic_tax"]),
+                    ("Excess Amount", result["excess_amount"]),
+                    (
+                        f"% of Excess ({result.get('excess_rate', 0):g}%)",
+                        round(result["excess_amount"] * (result.get("excess_rate", 0) / 100), 2),
+                    ),
+                ])
             rows.extend([
                 (
                     "Compensation Tax Due",

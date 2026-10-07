@@ -54,7 +54,7 @@ def register():
     """
     # Redirect already logged in users to the dashboard.
     if current_user.is_authenticated:
-        return redirect(url_for("main.index"))
+        return redirect(url_for("main.dashboard"))
 
     if request.method == "POST":
         # Normalize the input. Email is lowercased to avoid
@@ -100,8 +100,9 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        flash("Registration successful. Please log in.", "success")
-        return redirect(url_for("auth.login"))
+        login_user(user)
+        flash(f"Account created successfully. Welcome, {user.full_name}!", "success")
+        return redirect(url_for("main.dashboard"))
 
     # GET request: render the empty form.
     return render_template("register.html")
@@ -123,7 +124,7 @@ def login():
     """
     # Redirect already logged in users to the dashboard.
     if current_user.is_authenticated:
-        return redirect(url_for("main.index"))
+        return redirect(url_for("main.dashboard"))
 
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
@@ -140,6 +141,10 @@ def login():
         ):
             login_user(user)
             flash(f"Welcome back, {user.full_name}!", "success")
+
+            next_page = request.args.get("next")
+            if next_page and next_page.startswith("/") and next_page != "/" and not next_page.startswith("//"):
+                return redirect(next_page)
             return redirect(url_for("main.dashboard"))
 
         flash("Invalid email or password.", "error")

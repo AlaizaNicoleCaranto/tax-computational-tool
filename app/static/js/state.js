@@ -179,7 +179,12 @@ function readOptionalSetting(name) {
         return undefined;
     }
 
-    return parseNumber(element.value);
+    // Only return manual override value if the user explicitly modified it
+    if (element.dataset.userModified === "true") {
+        return parseNumber(element.value);
+    }
+
+    return undefined;
 }
 
 /**

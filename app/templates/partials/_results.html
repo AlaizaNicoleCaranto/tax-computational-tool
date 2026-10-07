@@ -4,7 +4,17 @@ SCHEME RESULTS (STEP 4)
 
 <div class="wizard-step" data-step="4">
   <div class="scheme-section">
-    <div class="section-title">4. Tax Scheme Computations</div>
+    <div class="scheme-section-header">
+      <div class="section-title">4. Tax Scheme Computations</div>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        id="openTaxTableModalBtn"
+        style="font-size: 13px; padding: 7px 14px;"
+      >
+        📊 View BIR Tax Table
+      </button>
+    </div>
 
     <div class="scheme-grid">
       {# Scheme 1 #}
@@ -89,6 +99,121 @@ SCHEME RESULTS (STEP 4)
       >
         {% if template_source_id %}Save as New Computation{% else %}Save Computation{% endif %}
       </button>
+    </div>
+  </div>
+
+  {# ============================================================ #}
+  {# MODAL: BIR GRADUATED TAX TABLE REFERENCE SCHEDULE           #}
+  {# ============================================================ #}
+  <div id="taxTableModal" class="tax-table-modal-overlay" style="display: none;">
+    <div class="tax-table-modal-content">
+      <div class="tax-table-modal-header">
+        <h3>BIR Graduated Income Tax Schedule (TRAIN Law)</h3>
+        <button
+          type="button"
+          class="tax-table-modal-close"
+          id="closeTaxTableModalBtn"
+          title="Close modal"
+        >
+          &times;
+        </button>
+      </div>
+
+      <div class="tax-table-modal-body">
+        <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px; line-height: 1.5;">
+          Official Philippine Bureau of Internal Revenue (BIR) graduated rate schedule effective January 1, 2023 onwards under the TRAIN Law (Republic Act No. 10963).
+        </p>
+
+        <div style="overflow-x: auto;">
+          <table class="tax-reference-table">
+            <thead>
+              <tr>
+                <th colspan="2" style="text-align: center;">Amount of Net Taxable Income</th>
+                <th rowspan="2" style="text-align: left; vertical-align: middle;">Rate</th>
+              </tr>
+              <tr>
+                <th style="text-align: center;">Over</th>
+                <th style="text-align: center;">But Not Over</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if tax_brackets %}
+                {% for b in tax_brackets %}
+                <tr>
+                  <td style="text-align: right;">
+                    {% if b.threshold == 0 %}
+                      -
+                    {% else %}
+                      ₱{{ '{:,.2f}'.format(b.threshold) }}
+                    {% endif %}
+                  </td>
+                  <td style="text-align: right;">
+                    {% if b.upper_amount is not none %}
+                      ₱{{ '{:,.2f}'.format(b.upper_amount) }}
+                    {% else %}
+                      and above
+                    {% endif %}
+                  </td>
+                  <td style="text-align: left;">
+                    {% if b.rate == 0 %}
+                      0%
+                    {% elif b.base_tax == 0 %}
+                      {{ '{:g}'.format(b.rate * 100) }}% of excess over ₱{{ '{:,.2f}'.format(b.threshold) }}
+                    {% else %}
+                      ₱{{ '{:,.2f}'.format(b.base_tax) }} + {{ '{:g}'.format(b.rate * 100) }}% of excess over ₱{{ '{:,.2f}'.format(b.threshold) }}
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td style="text-align: right;">-</td>
+                  <td style="text-align: right;">₱250,000.00</td>
+                  <td style="text-align: left;">0%</td>
+                </tr>
+                <tr>
+                  <td style="text-align: right;">₱250,000.00</td>
+                  <td style="text-align: right;">₱400,000.00</td>
+                  <td style="text-align: left;">15% of excess over ₱250,000.00</td>
+                </tr>
+                <tr>
+                  <td style="text-align: right;">₱400,000.00</td>
+                  <td style="text-align: right;">₱800,000.00</td>
+                  <td style="text-align: left;">₱22,500.00 + 20% of excess over ₱400,000.00</td>
+                </tr>
+                <tr>
+                  <td style="text-align: right;">₱800,000.00</td>
+                  <td style="text-align: right;">₱2,000,000.00</td>
+                  <td style="text-align: left;">₱102,500.00 + 25% of excess over ₱800,000.00</td>
+                </tr>
+                <tr>
+                  <td style="text-align: right;">₱2,000,000.00</td>
+                  <td style="text-align: right;">₱8,000,000.00</td>
+                  <td style="text-align: left;">₱402,500.00 + 30% of excess over ₱2,000,000.00</td>
+                </tr>
+                <tr>
+                  <td style="text-align: right;">₱8,000,000.00</td>
+                  <td style="text-align: right;">and above</td>
+                  <td style="text-align: left;">₱2,202,500.00 + 35% of excess over ₱8,000,000.00</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tax-table-modal-footer">
+        <a href="{{ url_for('main.tax_table') }}" class="btn btn-secondary" style="font-size: 13px;">
+          ⚙️ Manage Tax Table
+        </a>
+        <button
+          type="button"
+          class="btn btn-primary"
+          id="closeTaxTableModalFooterBtn"
+        >
+          Close
+        </button>
+      </div>
     </div>
   </div>
 </div>

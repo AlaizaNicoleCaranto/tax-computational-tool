@@ -7,6 +7,8 @@
 # and production without changing source code.
 
 import os
+from datetime import timezone
+from zoneinfo import ZoneInfo
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -50,6 +52,21 @@ def create_app(config_name=None):
     app.config.from_object(
         config_by_name.get(config_name, config_by_name["default"])
     )
+
+    def format_local_datetime(value, format_string):
+        """Format a stored UTC timestamp in the configured local timezone."""
+        if value is None:
+            return ""
+
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+
+        local_value = value.astimezone(
+            ZoneInfo(app.config["DISPLAY_TIMEZONE"])
+        )
+        return local_value.strftime(format_string)
+
+    app.jinja_env.filters["local_datetime"] = format_local_datetime
 
     # Normalize PostgreSQL URL if provided by Vercel or Heroku.
     # SQLAlchemy requires the postgresql:// prefix.
@@ -106,6 +123,22 @@ def create_app(config_name=None):
     # every startup.
 
     with app.app_context():
+        from app.models import TaxBracket
+        from app.tax.graduated import TAX_BRACKETS
+
         db.create_all()
+
+        if TaxBracket.query.count() == 0:
+            for upper, base_tax, rate, threshold in TAX_BRACKETS:
+                db.session.add(TaxBracket(
+                    tax_year="2023 onwards (TRAIN Law)",
+                    over_amount=None if threshold == 0 else threshold,
+                    upper_amount=None if upper == float("inf") else upper,
+                    base_tax=base_tax,
+                    rate=rate,
+                    threshold=threshold,
+                    is_active=True,
+                ))
+            db.session.commit()
 
     return app
