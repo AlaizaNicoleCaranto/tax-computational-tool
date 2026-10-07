@@ -124,6 +124,7 @@ endblock %} {% block extra_css %}
     <table class="history-table">
       <thead>
         <tr>
+          <th>Title</th>
           <th>Date</th>
           <th>Classification</th>
           <th>Best Scheme</th>
@@ -134,6 +135,14 @@ endblock %} {% block extra_css %}
       <tbody>
         {% for computation in computations %}
         <tr data-history-row data-search="{{ (computation.inputs.get('computation_title', 'Untitled computation') ~ ' ' ~ computation.best_scheme ~ ' ' ~ computation.taxpayer_type)|lower }}">
+          <td>
+            <a
+              href="{{ url_for('main.view', computation_id=computation.id) }}"
+              style="font-weight: 600; color: var(--color-primary); text-decoration: none;"
+            >
+              {{ computation.inputs.get('computation_title', 'Untitled computation') }}
+            </a>
+          </td>
           <td>{{ computation.created_at|local_datetime('%b %d, %Y %I:%M %p') }}</td>
           <td>
             {% if computation.taxpayer_type == 'pure' %}

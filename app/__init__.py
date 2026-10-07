@@ -123,6 +123,22 @@ def create_app(config_name=None):
     # every startup.
 
     with app.app_context():
+        from app.models import TaxBracket
+        from app.tax.graduated import TAX_BRACKETS
+
         db.create_all()
+
+        if TaxBracket.query.count() == 0:
+            for upper, base_tax, rate, threshold in TAX_BRACKETS:
+                db.session.add(TaxBracket(
+                    tax_year="2023 onwards (TRAIN Law)",
+                    over_amount=None if threshold == 0 else threshold,
+                    upper_amount=None if upper == float("inf") else upper,
+                    base_tax=base_tax,
+                    rate=rate,
+                    threshold=threshold,
+                    is_active=True,
+                ))
+            db.session.commit()
 
     return app

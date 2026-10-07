@@ -98,3 +98,26 @@ export async function fetchHistory() {
 
     return response.json();
 }
+
+/**
+ * Fetch the active graduated tax table.
+ *
+ * @returns {Promise<Object>}
+ */
+export async function fetchTaxTable() {
+    const response = await fetch("/api/tax-table", {
+        method: "GET",
+        headers: {
+            "Accept": "application/json"
+        }
+    });
+
+    if (!response.ok) {
+        throw new ApiError(
+            "Could not load tax table.",
+            response.status
+        );
+    }
+
+    return response.json();
+}

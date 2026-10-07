@@ -2,7 +2,7 @@
 # API ROUTES
 # ============================================================
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import math
 
 from flask import Blueprint, jsonify, request
@@ -131,7 +131,7 @@ def validate_tax_parameters(data):
     )
 
     for field in percentage_fields:
-        if field not in data:
+        if field not in data or data[field] is None or data[field] == "":
             continue
         try:
             value = float(data[field])
@@ -140,7 +140,7 @@ def validate_tax_parameters(data):
         if not math.isfinite(value) or value < 0 or value > 100:
             return f"{field.replace('_', ' ').title()} must be between 0 and 100."
 
-    if "standard_deduction" in data:
+    if "standard_deduction" in data and data["standard_deduction"] is not None and data["standard_deduction"] != "":
         try:
             value = float(data["standard_deduction"])
             if not math.isfinite(value) or value < 0:
@@ -164,7 +164,7 @@ def validate_tax_parameters(data):
     )
 
     for field in amount_fields:
-        if field not in data:
+        if field not in data or data[field] is None or data[field] == "":
             continue
         try:
             value = float(str(data[field]).replace(",", ""))
@@ -284,7 +284,7 @@ def save():
     results, recommendation = build_results(data)
 
     # Duplicate detection
-    cutoff = datetime.utcnow() - timedelta(
+    cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
         minutes=DUPLICATE_WINDOW_MINUTES
     )
 
@@ -345,3 +345,36 @@ def history():
     )
 
     return jsonify([c.to_dict() for c in computations])
+
+
+# ============================================================
+# ACTIVE TAX TABLE
+# ============================================================
+
+
+@api_bp.route("/tax-table", methods=["GET"])
+@login_required
+def get_tax_table():
+    """Return active graduated tax table brackets."""
+    from app.models import TaxBracket
+
+    brackets = (
+        TaxBracket.query
+        .filter_by(is_active=True)
+        .order_by(TaxBracket.threshold.asc())
+        .all()
+    )
+
+    return jsonify({
+        "tax_year": brackets[0].tax_year if brackets else "2023 onwards (TRAIN Law)",
+        "brackets": [
+            {
+                "id": b.id,
+                "threshold": b.threshold,
+                "upper_amount": b.upper_amount,
+                "base_tax": b.base_tax,
+                "rate": round(b.rate * 100, 2),
+            }
+            for b in brackets
+        ],
+    })

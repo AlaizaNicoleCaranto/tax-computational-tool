@@ -6,7 +6,7 @@
 # separate from route logic so that they can be imported and
 # reused without pulling in the entire application.
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask_login import UserMixin
 
@@ -80,6 +80,21 @@ class User(UserMixin, db.Model):
         }
 
 
+class TaxBracket(db.Model):
+    """Versioned graduated-tax table row used by future calculations."""
+
+    __tablename__ = "tax_brackets"
+
+    id = db.Column(db.Integer, primary_key=True)
+    tax_year = db.Column(db.String(40), nullable=False, index=True)
+    over_amount = db.Column(db.Float, nullable=True)
+    upper_amount = db.Column(db.Float, nullable=True)
+    base_tax = db.Column(db.Float, nullable=False, default=0)
+    rate = db.Column(db.Float, nullable=False, default=0)
+    threshold = db.Column(db.Float, nullable=False, default=0)
+    is_active = db.Column(db.Boolean, nullable=False, default=True, index=True)
+
+
 class Computation(db.Model):
     """
     One saved tax computation.
@@ -127,7 +142,7 @@ class Computation(db.Model):
     # because history views sort by this column.
     created_at = db.Column(
         db.DateTime,
-        default=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
         index=True,
     )
 

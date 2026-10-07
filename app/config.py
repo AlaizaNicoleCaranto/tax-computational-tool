@@ -26,6 +26,7 @@ class Config:
     # Secret key used to sign session cookies and CSRF tokens.
     # Must be replaced with a strong random value in production.
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")
+    ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "").strip().lower()
 
     # Timezone used when displaying stored UTC timestamps to users.
     DISPLAY_TIMEZONE = os.getenv("APP_TIMEZONE", "Asia/Singapore")

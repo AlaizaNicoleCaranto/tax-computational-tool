@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+{% block title %}Tax Table - Tax Computational Tool{% endblock %}
+
+{% block extra_css %}
+<style>
+  .tax-table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .tax-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .tax-table-header h1 {
+    color: var(--color-primary);
+    font-size: var(--font-size-xl);
+    letter-spacing: -0.3px;
+  }
+  .tax-table-header p {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    margin-top: 4px;
+  }
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .info-banner {
+    background: var(--color-primary-lighter);
+    border-left: 4px solid var(--color-primary);
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    line-height: 1.6;
+  }
+  .tax-year-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--color-surface-alt);
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    flex-wrap: wrap;
+  }
+  .tax-year-bar label {
+    color: var(--color-text);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+  }
+  .tax-year-bar input {
+    min-width: 260px;
+    padding: 9px 12px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+  }
+  .table-responsive {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+  .tax-edit-table {
+    width: 100%;
+    min-width: 820px;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+  }
+  .tax-edit-table th,
+  .tax-edit-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+  .tax-edit-table th {
+    background: var(--color-surface-alt);
+    color: var(--color-primary);
+    font-weight: 700;
+    text-align: right;
+  }
+  .tax-edit-table th:first-child,
+  .tax-edit-table td:first-child {
+    text-align: center;
+    width: 60px;
+  }
+  .tax-edit-table th:nth-child(2),
+  .tax-edit-table td:nth-child(2) {
+    text-align: left;
+  }
+  .tax-edit-table td {
+    text-align: right;
+  }
+  .tax-edit-table td.desc-cell {
+    text-align: left;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    min-width: 220px;
+  }
+  .tax-edit-table td.action-cell {
+    text-align: center;
+    width: 60px;
+  }
+  .input-with-prefix {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: flex-end;
+  }
+  .input-with-prefix span {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .tax-edit-table input {
+    width: 140px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    text-align: right;
+    font: inherit;
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+  .tax-edit-table input.rate-input {
+    width: 75px;
+  }
+  .tax-edit-table input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(40, 94, 97, 0.15);
+  }
+  /* Remove spin buttons completely */
+  .tax-edit-table input::-webkit-outer-spin-button,
+  .tax-edit-table input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+  }
+  .tax-edit-table input {
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+  }
+  .btn-remove-row {
+    background: none;
+    border: none;
+    color: var(--color-danger);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s;
+  }
+  .btn-remove-row:hover {
+    background: var(--color-danger-light);
+  }
+  .tax-table-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+</style>
+{% endblock %}
+
+{% block authenticated_content %}
+<div class="card tax-table-container">
+  <div class="tax-table-header">
+    <div>
+      <h1>Graduated Individual Income Tax Table</h1>
+      <p>Configure graduated brackets, threshold limits, basic tax amounts, and marginal excess rates.</p>
+    </div>
+    <div class="header-actions">
+      {% if is_admin %}
+      <form method="POST" onsubmit="return confirm('Reset tax table to official BIR TRAIN Law defaults? This will overwrite custom edits.');" style="display: inline;">
+        <input type="hidden" name="action" value="reset_defaults" />
+        <button type="submit" class="btn btn-outline-secondary" style="border: 1px solid var(--color-border-strong); background: var(--color-surface);">
+          ↺ Reset to BIR Defaults
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="info-banner">
+    <strong>Philippine BIR Graduated Income Tax Schedule (TRAIN Law / Republic Act No. 10963)</strong><br />
+    Formula: <code>Income Tax = Basic Tax + [Excess Rate % &times; (Taxable Income - Over Threshold)]</code>.<br />
+    {% if is_admin %}
+    Any changes saved below take effect immediately for all new calculations in the tool.
+    {% else %}
+    <em>You are viewing the active graduated tax table. Administrator privileges are required to modify bracket rates.</em>
+    {% endif %}
+  </div>
+
+  <form method="POST" id="taxTableForm">
+    <input type="hidden" name="action" value="save" />
+
+    <div class="tax-year-bar">
+      <label for="taxYear">Tax Year / Law Version:</label>
+      <input
+        id="taxYear"
+        name="tax_year"
+        value="{{ brackets[0].tax_year if brackets else '2023 onwards (TRAIN Law)' }}"
+        {% if not is_admin %}readonly style="background: var(--color-surface-alt); cursor: not-allowed;"{% endif %}
+        required
+      />
+    </div>
+
+    <div class="table-responsive" style="margin-top: 16px;">
+      <table class="tax-edit-table" id="bracketsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Bracket Name</th>
+            <th>Over (₱)</th>
+            <th>But Not Over (₱)</th>
+            <th>Basic Tax (₱)</th>
+            <th>Excess Rate (%)</th>
+            <th>Rate Description Preview</th>
+            {% if is_admin %}<th>Action</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody id="bracketsTbody">
+          {% for bracket in brackets %}
+          <tr data-index="{{ loop.index }}">
+            <td class="bracket-num">{{ loop.index }}</td>
+            <td><strong>Bracket {{ loop.index }}</strong></td>
+            <td>
+              <div class="input-with-prefix">
+                <span>₱</span>
+                <input
+                  type="text"
+                  name="threshold[]"
+                  class="num-input threshold-input"
+                  value="{{ '{:,.2f}'.format(bracket.threshold) }}"
+                  inputmode="decimal"
+                  {% if not is_admin %}readonly style="background: var(--color-surface-alt); cursor: not-allowed;"{% endif %}
+                  required
+                />
+              </div>
+            </td>
+            <td>
+              <div class="input-with-prefix">
+                <span>₱</span>
+                <input
+                  type="text"
+                  name="upper_amount[]"
+                  class="num-input upper-input"
+                  value="{{ '{:,.2f}'.format(bracket.upper_amount) if bracket.upper_amount is not none else '' }}"
+                  placeholder="And above"
+                  inputmode="decimal"
+                  {% if not is_admin %}readonly style="background: var(--color-surface-alt); cursor: not-allowed;"{% endif %}
+                />
+              </div>
+            </td>
+            <td>
+              <div class="input-with-prefix">
+                <span>₱</span>
+                <input
+                  type="text"
+                  name="base_tax[]"
+                  class="num-input base-tax-input"
+                  value="{{ '{:,.2f}'.format(bracket.base_tax) }}"
+                  inputmode="decimal"
+                  {% if not is_admin %}readonly style="background: var(--color-surface-alt); cursor: not-allowed;"{% endif %}
+                  required
+                />
+              </div>
+            </td>
+            <td>
+              <div class="input-with-prefix">
+                <input
+                  type="text"
+                  name="rate[]"
+                  class="rate-input rate-val-input"
+                  value="{{ '{:g}'.format((bracket.rate * 100)|round(2)) }}"
+                  inputmode="decimal"
+                  {% if not is_admin %}readonly style="background: var(--color-surface-alt); cursor: not-allowed;"{% endif %}
+                  required
+                />
+                <span>%</span>
+              </div>
+            </td>
+            <td class="desc-cell preview-desc">
+              {% if bracket.rate == 0 %}
+                0%
+              {% elif bracket.base_tax == 0 %}
+                {{ '{:g}'.format(bracket.rate * 100) }}% of excess over ₱{{ '{:,.2f}'.format(bracket.threshold) }}
+              {% else %}
+                ₱{{ '{:,.2f}'.format(bracket.base_tax) }} + {{ '{:g}'.format(bracket.rate * 100) }}% of excess over ₱{{ '{:,.2f}'.format(bracket.threshold) }}
+              {% endif %}
+            </td>
+            {% if is_admin %}
+            <td class="action-cell">
+              <button type="button" class="btn-remove-row" title="Remove bracket">&times;</button>
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_admin %}
+    <div class="tax-table-actions">
+      <button type="button" class="btn btn-secondary" id="btnAddBracket">
+        + Add New Bracket
+      </button>
+
+      <button type="submit" class="btn btn-success" style="padding: 12px 28px; font-size: 15px;">
+        💾 Save Tax Table Changes
+      </button>
+    </div>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const tbody = document.getElementById("bracketsTbody");
+    const addBtn = document.getElementById("btnAddBracket");
+    const form = document.getElementById("taxTableForm");
+
+    function parseAmount(val) {
+      if (!val) return 0;
+      const cleaned = String(val).replace(/,/g, "").replace(/₱/g, "").trim();
+      const n = parseFloat(cleaned);
+      return isNaN(n) ? 0 : n;
+    }
+
+    function formatNumber(val) {
+      return parseAmount(val).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function updateRowPreview(row) {
+      const thresh = parseAmount(row.querySelector(".threshold-input").value);
+      const btax = parseAmount(row.querySelector(".base-tax-input").value);
+      const r = parseAmount(row.querySelector(".rate-val-input").value);
+      const descCell = row.querySelector(".preview-desc");
+
+      if (r === 0) {
+        descCell.textContent = "0%";
+      } else if (btax === 0) {
+        descCell.textContent = r + "% of excess over ₱" + thresh.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      } else {
+        descCell.textContent = "₱" + btax.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " + " + r + "% of excess over ₱" + thresh.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+    }
+
+    function attachInputHandlers(row) {
+      row.querySelectorAll(".num-input").forEach(function (inp) {
+        inp.addEventListener("focus", function () {
+          const val = parseAmount(this.value);
+          if (val === 0 && !this.classList.contains("upper-input")) {
+            this.value = "";
+          } else {
+            const raw = String(this.value).replace(/,/g, "").trim();
+            if (raw.endsWith(".00")) this.value = raw.slice(0, -3);
+          }
+          this.select();
+        });
+
+        inp.addEventListener("blur", function () {
+          if (this.value.trim() === "") {
+            if (this.classList.contains("upper-input")) {
+              this.value = "";
+            } else {
+              this.value = "0.00";
+            }
+          } else {
+            this.value = formatNumber(this.value);
+          }
+          updateRowPreview(row);
+        });
+
+        inp.addEventListener("input", function () {
+          let raw = this.value.replace(/[^\d.]/g, "");
+          const parts = raw.split(".");
+          if (parts.length > 2) raw = parts[0] + "." + parts.slice(1).join("");
+          if (this.value !== raw) {
+            const pos = this.selectionStart;
+            this.value = raw;
+            this.setSelectionRange(pos, pos);
+          }
+          updateRowPreview(row);
+        });
+      });
+
+      const rateInp = row.querySelector(".rate-val-input");
+      if (rateInp) {
+        rateInp.addEventListener("input", function () {
+          updateRowPreview(row);
+        });
+      }
+
+      const removeBtn = row.querySelector(".btn-remove-row");
+      if (removeBtn) {
+        removeBtn.addEventListener("click", function () {
+          if (tbody.querySelectorAll("tr").length <= 1) {
+            alert("At least one tax bracket is required.");
+            return;
+          }
+          row.remove();
+          reindexRows();
+        });
+      }
+    }
+
+    function reindexRows() {
+      tbody.querySelectorAll("tr").forEach(function (row, idx) {
+        const num = idx + 1;
+        row.querySelector(".bracket-num").textContent = num;
+        row.querySelector("strong").textContent = "Bracket " + num;
+      });
+    }
+
+    tbody.querySelectorAll("tr").forEach(attachInputHandlers);
+
+    if (addBtn) {
+      addBtn.addEventListener("click", function () {
+        const rows = tbody.querySelectorAll("tr");
+        const lastRow = rows[rows.length - 1];
+        let nextThresh = 0;
+        if (lastRow) {
+          const lastUpperInp = lastRow.querySelector(".upper-input");
+          const lastUpper = parseAmount(lastUpperInp ? lastUpperInp.value : 0);
+          if (lastUpper > 0) {
+            nextThresh = lastUpper;
+          } else {
+            const lastThresh = parseAmount(lastRow.querySelector(".threshold-input").value);
+            nextThresh = lastThresh + 1000000;
+            if (lastUpperInp) {
+              lastUpperInp.value = formatNumber(nextThresh);
+            }
+            updateRowPreview(lastRow);
+          }
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+          '<td class="bracket-num"></td>' +
+          '<td><strong></strong></td>' +
+          '<td><div class="input-with-prefix"><span>₱</span><input type="text" name="threshold[]" class="num-input threshold-input" value="' + formatNumber(nextThresh) + '" inputmode="decimal" required></div></td>' +
+          '<td><div class="input-with-prefix"><span>₱</span><input type="text" name="upper_amount[]" class="num-input upper-input" value="" placeholder="And above" inputmode="decimal"></div></td>' +
+          '<td><div class="input-with-prefix"><span>₱</span><input type="text" name="base_tax[]" class="num-input base-tax-input" value="0.00" inputmode="decimal" required></div></td>' +
+          '<td><div class="input-with-prefix"><input type="text" name="rate[]" class="rate-input rate-val-input" value="0" inputmode="decimal" required><span>%</span></div></td>' +
+          '<td class="desc-cell preview-desc">0%</td>' +
+          '<td class="action-cell"><button type="button" class="btn-remove-row" title="Remove bracket">&times;</button></td>';
+
+        tbody.appendChild(tr);
+        attachInputHandlers(tr);
+        reindexRows();
+        updateRowPreview(tr);
+      });
+    }
+
+    form.addEventListener("submit", function () {
+      // Normalize all values before submission (strip commas)
+      tbody.querySelectorAll(".num-input").forEach(function (inp) {
+        if (inp.value.trim() !== "") {
+          inp.value = parseAmount(inp.value);
+        }
+      });
+    });
+  })();
+</script>
+{% endblock %}

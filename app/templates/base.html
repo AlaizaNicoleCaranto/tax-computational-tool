@@ -840,6 +840,17 @@
           font-size: 13px;
         }
       }
+
+      /* Remove browser up and down spin buttons on all number inputs */
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
     </style>
 
     <link
@@ -878,7 +889,7 @@
     <div class="app-layout">
       <aside class="sidebar" id="appSidebar">
         <div class="sidebar-header">
-          <a href="{{ url_for('main.index') }}" class="sidebar-brand">
+          <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">
             <span class="brand-icon">₱</span>
             <span class="brand-text">Tax Computational Tool</span>
           </a>
@@ -905,6 +916,13 @@
           >
             <span class="sidebar-icon">☰</span>
             <span>History</span>
+          </a>
+          <a
+            href="{{ url_for('main.tax_table') }}"
+            class="sidebar-link {% if request.endpoint == 'main.tax_table' %}active{% endif %}"
+          >
+            <span class="sidebar-icon">%</span>
+            <span>Tax Table</span>
           </a>
         </nav>
         <div class="sidebar-footer">

@@ -11,7 +11,10 @@
 # Re-exporting the public functions here keeps import paths
 # short and consistent across the application.
 
-from app.tax.graduated import compute_graduated_tax
+from app.tax.graduated import (
+    compute_graduated_breakdown,
+    compute_graduated_tax,
+)
 from app.tax.schemes import (
     compute_eight_percent,
     compute_itemized,
@@ -21,6 +24,7 @@ from app.tax.schemes import (
 
 # Public API of the package.
 __all__ = [
+    "compute_graduated_breakdown",
     "compute_graduated_tax",
     "compute_osd",
     "compute_itemized",
