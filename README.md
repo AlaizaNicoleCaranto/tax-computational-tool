@@ -1,49 +1,54 @@
-# Tax Computational Tool for Individual Taxpayers
+﻿# Tax Computational Tool
 
-A web-based tool for estimating and comparing Philippine individual income tax computations for individual taxpayers. Create an account, enter income, deductions, and business/professional details relevant to your filing status, compare the available tax treatments, and save or export your results.
+A Flask web application for estimating and comparing Philippine individual income tax computations. Users can create an account, enter income and deduction details, compare several tax treatments, and save or export results for later review.
 
-> **Disclaimer:** This application provides estimates for informational purposes only. It is not tax, legal, or accounting advice. Tax rules and eligibility can change; verify the applicable BIR guidance and consult a qualified tax professional before filing or making financial decisions.
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Tax Computation Methods](#tax-computation-methods)
-- [Getting Started](#getting-started)
-- [Configuration](#configuration)
-- [User Guide](#user-guide)
-- [Deployment](#deployment)
-- [Project Structure](#project-structure)
-- [Development Notes](#development-notes)
+> Disclaimer: This application provides estimates for informational purposes only. It is not tax, legal, or accounting advice. Tax rules and eligibility can change; verify the current BIR guidance and consult a qualified tax professional before filing or making financial decisions.
 
 ## Overview
 
-The application is built with Flask and provides a guided calculator for individual taxpayers, including purely business or professional taxpayers and mixed-income earners. It calculates three tax scenarios and identifies the scenario with the lowest estimated total tax based on the information entered.
+The tool is designed for individual taxpayers in the Philippines, including:
 
-The application uses SQLite by default for local development. PostgreSQL can be configured for deployment through the `DATABASE_URL` environment variable.
+- Pure business/professional taxpayers
+- Mixed-income taxpayers with compensation income
+- Optional standard deduction (OSD), itemized deduction, and 8% tax-rate scenarios
+
+The app compares multiple tax treatment options and identifies the lowest estimated tax among the available calculations. It stores user accounts and saved computations in a local SQLite database by default, with PostgreSQL support available through the `DATABASE_URL` environment variable.
 
 ## Features
 
-- Account registration, login, and logout
-- Guided tax-computation workflow for pure and mixed-income taxpayers
-- Comparison of graduated-tax, Optional Standard Deduction (OSD), itemized-deduction, and optional 8% scenarios
+- User registration, login, and logout
+- Guided computation workflow for pure and mixed-income taxpayers
+- Side-by-side comparison of tax schemes
 - Business income inputs for cash and accrual sales, costs, and other income
-- Itemized deduction and Net Operating Loss Carry Over (NOLCO) inputs
-- Saved computations, dashboard, and computation history
-- PDF and CSV exports for saved computations
+- Ordinary deductions, special deductions, and NOLCO support
+- Dashboard with recent computations and saved history
+- PDF and CSV export for saved calculations
+- Tax bracket editor for administrators
 - Responsive web interface
 
-## Tax Computation Methods
+## Tax computation methods
 
-For each computation, the tool compares these scenarios:
+Each computation compares the following scenarios:
 
-1. **Graduated income tax with OSD and percentage tax**
-2. **Graduated income tax with itemized deductions and percentage tax**
-3. **Optional 8% income tax rate**
+1. Graduated income tax with optional standard deduction and percentage tax
+2. Graduated income tax with itemized deductions and percentage tax
+3. Optional 8% income tax rate
 
-The calculator also supports mixed-income entries, including taxable compensation. Some rates and tax-table details are configurable in the calculator. Confirm the applicable rates, thresholds, taxpayer eligibility, and filing treatment against current BIR rules before relying on an estimate.
+The logic is implemented in the `app/tax` package and can be adjusted when BIR tax rules or threshold tables change. Always confirm against the latest official guidance before relying on any estimate.
 
-## Getting Started
+## Tech stack
+
+- Python 3.10+
+- Flask 3.x
+- Flask-SQLAlchemy
+- Flask-Login
+- Flask-Bcrypt
+- SQLite for local development
+- PostgreSQL for production deployment
+- ReportLab for PDF export
+- pytest/unittest-based test coverage
+
+## Getting started
 
 ### Requirements
 
@@ -59,21 +64,21 @@ cd tax-computational-tool
 
 ### 2. Create and activate a virtual environment
 
-**Windows PowerShell**
+Windows PowerShell:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-**Windows Command Prompt**
+Windows Command Prompt:
 
 ```bat
 python -m venv .venv
 .venv\Scripts\activate.bat
 ```
 
-**macOS or Linux**
+macOS or Linux:
 
 ```bash
 python3 -m venv .venv
@@ -87,32 +92,36 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 4. Run the application
+### 4. Run the app locally
 
 ```bash
 python run.py
 ```
 
-Open [http://localhost:5001](http://localhost:5001). The development server uses port `5001` by default. Set the `PORT` environment variable to use another port.
+Then open: http://localhost:5001
+
+The app listens on port `5001` by default. Override it with the `PORT` environment variable if needed.
 
 ## Configuration
 
-The application loads environment variables from the environment or a local `.env` file. The `.env` file is ignored by Git; do not commit secrets.
+The app reads environment variables from the process environment and a local `.env` file when available. Keep secrets out of source control.
 
 | Variable | Purpose | Default |
 | --- | --- | --- |
-| `SECRET_KEY` | Signs session cookies and security tokens. Set a long, random value outside local development. | `dev-secret-change-me` |
-| `DATABASE_URL` | SQLAlchemy database connection URL. | SQLite database |
-| `MAIL_SERVER` | SMTP server used for password-reset emails. | Not configured |
-| `MAIL_PORT` | SMTP port. | `587` |
-| `MAIL_USERNAME` | SMTP login username. | Not configured |
-| `MAIL_PASSWORD` | SMTP login password or app password. | Not configured |
-| `MAIL_FROM` | Address shown as the sender. | `MAIL_USERNAME` |
-| `MAIL_USE_TLS` | Use STARTTLS for SMTP. Set `false` for SSL SMTP. | `true` |
-| `FLASK_ENV` | Selects the application configuration: `development` or `production`. | `development` |
-| `PORT` | Port used by `python run.py`. | `5001` |
+| `SECRET_KEY` | Signs session cookies and security tokens | `dev-secret-change-me` |
+| `DATABASE_URL` | SQLAlchemy database connection string | SQLite database in `instance/tax_tool.db` |
+| `FLASK_ENV` | App mode: `development`, `production`, or `testing` | `development` |
+| `PORT` | Port used by `python run.py` | `5001` |
+| `MAIL_SERVER` | SMTP host for password-reset emails | empty |
+| `MAIL_PORT` | SMTP port | `587` |
+| `MAIL_USERNAME` | SMTP login username | empty |
+| `MAIL_PASSWORD` | SMTP password or app password | empty |
+| `MAIL_FROM` | Sender address for outgoing mail | empty |
+| `MAIL_USE_TLS` | Enables STARTTLS for SMTP | `true` |
+| `ADMIN_EMAIL` | Optional admin email allowed to edit the tax table | empty |
+| `APP_TIMEZONE` | Local timezone used for timestamps | `Asia/Singapore` |
 
-For example, a local `.env` file can contain:
+Example `.env` file:
 
 ```dotenv
 FLASK_ENV=development
@@ -123,59 +132,78 @@ MAIL_USERNAME=your-email@example.com
 MAIL_PASSWORD=your-app-password
 MAIL_FROM=your-email@example.com
 MAIL_USE_TLS=true
-# Optional: leave unset to use the default SQLite database.
-# DATABASE_URL=postgresql://username:password@host:5432/database
+# Optional override for PostgreSQL in production:
+# DATABASE_URL=postgresql://user:password@host:5432/database
 ```
 
-Generate a random secret key with:
+Generate a strong secret key:
 
 ```bash
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-In production, set `FLASK_ENV=production`, configure a strong `SECRET_KEY`, and provide a PostgreSQL `DATABASE_URL`. Do not use the development secret or rely on temporary local storage for production data.
+In production, always use a strong secret key and a persistent database such as PostgreSQL. Do not rely on the default local SQLite database for real production data.
 
-## User Guide
-
-1. **Create an account** using the registration page, then sign in.
-2. **Start a computation** from the calculator. Choose whether you are a purely business/professional taxpayer or a mixed-income earner.
-3. **Enter income and deduction details.** Add applicable compensation, business income, costs, deductions, and NOLCO information. Use zero or leave optional amounts blank when they do not apply.
-4. **Review the comparison.** Check the results for each scenario and the lowest-tax estimate. The recommendation is based on the values entered and does not confirm that a method is legally available to you.
-5. **Save and revisit your work.** Saved computations appear in the dashboard and history. You can open a saved result or use it as the starting point for a new computation.
-6. **Export a saved computation** as a PDF or CSV from its saved-computation view.
-
-## Deployment
-
-This repository includes a [`vercel.json`](./vercel.json) configuration for Vercel's Python runtime. Before deploying, configure these environment variables in the deployment environment:
-
-- `FLASK_ENV=production`
-- `SECRET_KEY` set to a secure, randomly generated value
-- `DATABASE_URL` set to a reachable PostgreSQL database
-
-Review your hosting provider's current Python runtime and database instructions before deployment. The default SQLite database is intended for local development, not persistent production storage.
-
-## Project Structure
+## Project structure
 
 ```text
 .
 ├── app/
-│   ├── api.py              # Calculation, save, and history API routes
-│   ├── auth.py             # Registration, login, and logout
-│   ├── config.py           # Environment-specific configuration
-│   ├── exports.py          # PDF and CSV exports
-│   ├── main.py             # Calculator, dashboard, and history pages
-│   ├── models.py           # User and computation database models
-│   ├── static/             # CSS and JavaScript
-│   ├── tax/                # Tax calculations and input helpers
-│   └── templates/          # Jinja templates and calculator partials
-├── requirements.txt        # Python dependencies
-├── run.py                  # Local server entry point and WSGI app
-└── vercel.json             # Vercel deployment configuration
+│   ├── __init__.py         # Flask app factory and DB setup
+│   ├── api.py              # Tax calculation and save/history endpoints
+│   ├── auth.py             # User authentication routes
+│   ├── config.py           # Environment configuration
+│   ├── exports.py          # CSV and PDF export routes
+│   ├── main.py             # Dashboard, calculator, and views
+│   ├── models.py           # User, computation, and tax-bracket models
+│   ├── static/             # CSS, JavaScript, and frontend assets
+│   ├── tax/                # Tax calculation logic and bracket definitions
+│   └── templates/          # Jinja templates
+├── tests/
+│   ├── test_api_and_routes.py
+│   └── test_tax_computations.py
+├── instance/
+│   └── tax_tool.db         # Local SQLite database (created at runtime)
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── run.py
+├── vercel.json             # Deployment config for Vercel
+└── image/
 ```
 
-## Development Notes
+## Running tests
 
-- The Flask application is created by `app.create_app()`.
-- Database tables are created when the application starts if they do not already exist.
-- Tax calculations are implemented under `app/tax/`; update and verify the relevant tax logic when applicable rules change.
+This project includes automated tests for tax computations and route behavior.
+
+```bash
+pytest
+```
+
+If you want to run a specific test file:
+
+```bash
+pytest tests/test_api_and_routes.py
+pytest tests/test_tax_computations.py
+```
+
+## Deployment
+
+This repository includes a `vercel.json` configuration for Vercel deployment. Before deploying, make sure the environment includes:
+
+- `FLASK_ENV=production`
+- `SECRET_KEY` with a secure random value
+- `DATABASE_URL` pointing to a reachable PostgreSQL database
+
+For local development, SQLite is the default and is intentionally simple. For production, use a persistent database and secure configuration values.
+
+## Development notes
+
+- The application is created via `app.create_app()`.
+- Database tables are created automatically when the app starts if they do not already exist.
+- Tax bracket data is seeded from the official TRAIN Law defaults and can be edited from the app interface when the admin email matches `ADMIN_EMAIL`.
 - Keep credentials and local environment files out of version control.
+
+## License
+
+This project is currently distributed without a formal license file. Before publishing or redistributing it, verify whether a project-specific license should be added.
