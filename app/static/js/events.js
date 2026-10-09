@@ -143,6 +143,17 @@ function renderTaxTableModal(brackets) {
     });
 }
 
+function updateTaxTableModalTitle(taxYear) {
+    const title = document.getElementById("taxReferenceTitle");
+    if (!title) {
+        return;
+    }
+
+    title.textContent = taxYear
+        ? "Graduated Income Tax Schedule (" + taxYear + ")"
+        : "Graduated Income Tax Schedule";
+}
+
 function parseFloatSafe(value) {
     if (value === null || value === undefined) {
         return 0;
@@ -493,6 +504,7 @@ export function attachEvents(domRefs) {
             // are reflected without requiring the calculator page to reload.
             try {
                 const taxTable = await fetchTaxTable();
+                updateTaxTableModalTitle(taxTable.tax_year);
                 renderTaxTableModal(taxTable.brackets);
             } catch (error) {
                 // Keep the server-rendered table visible if the refresh fails.

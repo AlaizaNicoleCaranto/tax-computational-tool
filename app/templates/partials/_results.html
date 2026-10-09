@@ -108,7 +108,12 @@ SCHEME RESULTS (STEP 4)
   <div id="taxTableModal" class="tax-table-modal-overlay" style="display: none;">
     <div class="tax-table-modal-content">
       <div class="tax-table-modal-header">
-        <h3>BIR Graduated Income Tax Schedule (TRAIN Law)</h3>
+        <h3 id="taxReferenceTitle">
+          Graduated Income Tax Schedule
+          {% if tax_brackets and tax_brackets[0].tax_year %}
+            ({{ tax_brackets[0].tax_year }})
+          {% endif %}
+        </h3>
         <button
           type="button"
           class="tax-table-modal-close"
@@ -121,7 +126,7 @@ SCHEME RESULTS (STEP 4)
 
       <div class="tax-table-modal-body">
         <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px; line-height: 1.5;">
-          Official Philippine Bureau of Internal Revenue (BIR) graduated rate schedule effective January 1, 2023 onwards under the TRAIN Law (Republic Act No. 10963).
+          Active graduated income tax schedule for the selected tax year.
         </p>
 
         <div style="overflow-x: auto;">
