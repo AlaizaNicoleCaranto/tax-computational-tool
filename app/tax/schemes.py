@@ -129,8 +129,10 @@ def compute_osd(data):
     if percentage_rate < 0:
         percentage_rate = DEFAULT_PERCENTAGE_TAX_RATE
 
-    # Percentage tax base is gross sales plus other income.
-    gross_for_percentage = sales + other_income
+    # Section 116 percentage tax is based on gross sales/receipts.
+    # Other non-operating income is included in graduated taxable income,
+    # but is not part of this percentage-tax base.
+    gross_for_percentage = sales
     percentage_tax = gross_for_percentage * (percentage_rate / 100)
 
     # Total tax due for this scheme.
@@ -240,8 +242,10 @@ def compute_itemized(data):
     if percentage_rate < 0:
         percentage_rate = DEFAULT_PERCENTAGE_TAX_RATE
 
-    # Percentage tax base is gross sales plus other income.
-    gross_for_percentage = sales + other_income
+    # Section 116 percentage tax is based on gross sales/receipts.
+    # Other non-operating income is included in graduated taxable income,
+    # but is not part of this percentage-tax base.
+    gross_for_percentage = sales
     percentage_tax = gross_for_percentage * (percentage_rate / 100)
 
     # Total tax due for this scheme.

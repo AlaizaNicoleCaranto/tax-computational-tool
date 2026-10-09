@@ -93,6 +93,19 @@ class TestTaxComputations(unittest.TestCase):
         self.assertEqual(res["percentage_tax"], 30000.0)
         self.assertEqual(res["total_tax"], 92500.0)
 
+    def test_percentage_tax_excludes_other_income(self):
+        data = {
+            "taxpayer_type": "pure",
+            "cash_sales": 1000000,
+            "other_income": [{"title": "Interest", "amount": 100000}],
+            "osd_percentage": 40,
+            "percentage_tax_rate": 3,
+        }
+
+        res = compute_osd(data)
+
+        self.assertEqual(res["percentage_tax"], 30000.0)
+
     def test_scheme_2_itemized(self):
         data = {
             "taxpayer_type": "pure",

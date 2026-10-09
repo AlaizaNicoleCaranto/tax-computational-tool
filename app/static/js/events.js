@@ -10,7 +10,7 @@ import {
 } from "./dynamic-rows.js";
 
 import { getFormState, getTaxpayerType } from "./state.js";
-import { computeTax, saveTax } from "./api.js";
+import { computeTax, fetchTaxTable, saveTax } from "./api.js";
 import { renderResults } from "./render.js";
 import { debounce } from "./utils.js";
 import { showToast } from "./toast.js";
@@ -88,6 +88,59 @@ function updateCostDisplay() {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
+}
+
+function formatTaxTableAmount(value) {
+    return Number(value || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function renderTaxTableModal(brackets) {
+    const tableBody = document.getElementById("taxReferenceBody");
+    if (!tableBody || !Array.isArray(brackets)) {
+        return;
+    }
+
+    tableBody.innerHTML = "";
+
+    brackets.forEach(function (bracket) {
+        const row = document.createElement("tr");
+
+        const thresholdCell = document.createElement("td");
+        thresholdCell.style.textAlign = "right";
+        thresholdCell.textContent = Number(bracket.threshold) === 0
+            ? "-"
+            : "₱" + formatTaxTableAmount(bracket.threshold);
+
+        const upperCell = document.createElement("td");
+        upperCell.style.textAlign = "right";
+        upperCell.textContent = bracket.upper_amount === null ||
+            bracket.upper_amount === undefined
+            ? "and above"
+            : "₱" + formatTaxTableAmount(bracket.upper_amount);
+
+        const rateCell = document.createElement("td");
+        rateCell.style.textAlign = "left";
+        const rate = Number(bracket.rate || 0);
+        const baseTax = Number(bracket.base_tax || 0);
+        const threshold = formatTaxTableAmount(bracket.threshold);
+
+        if (rate === 0) {
+            rateCell.textContent = "0%";
+        } else if (baseTax === 0) {
+            rateCell.textContent = rate + "% of excess over ₱" + threshold;
+        } else {
+            rateCell.textContent = "₱" + formatTaxTableAmount(baseTax) +
+                " + " + rate + "% of excess over ₱" + threshold;
+        }
+
+        row.appendChild(thresholdCell);
+        row.appendChild(upperCell);
+        row.appendChild(rateCell);
+        tableBody.appendChild(row);
+    });
 }
 
 function parseFloatSafe(value) {
@@ -433,8 +486,17 @@ export function attachEvents(domRefs) {
     const closeModalFooterBtn = document.getElementById("closeTaxTableModalFooterBtn");
 
     if (openModalBtn && modalOverlay) {
-        openModalBtn.addEventListener("click", function () {
+        openModalBtn.addEventListener("click", async function () {
             modalOverlay.style.display = "flex";
+
+            // Reload on every open so edits saved in the tax-table manager
+            // are reflected without requiring the calculator page to reload.
+            try {
+                const taxTable = await fetchTaxTable();
+                renderTaxTableModal(taxTable.brackets);
+            } catch (error) {
+                // Keep the server-rendered table visible if the refresh fails.
+            }
         });
     }
     [closeModalBtn, closeModalFooterBtn].forEach(function (btn) {

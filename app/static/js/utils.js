@@ -110,15 +110,55 @@ export function attachInputFormatter(input) {
 
     // Allow typing numbers and a single decimal point freely
     input.addEventListener("input", function () {
-        let raw = this.value.replace(/[^\d.]/g, "");
+        const oldValue = this.value;
+        const oldCaret = typeof this.selectionStart === "number"
+            ? this.selectionStart
+            : oldValue.length;
+        const prefix = oldValue.slice(0, oldCaret);
+
+        let raw = oldValue.replace(/[^\d.]/g, "");
         const parts = raw.split(".");
         if (parts.length > 2) {
             raw = parts[0] + "." + parts.slice(1).join("");
         }
-        if (this.value !== raw) {
-            const pos = this.selectionStart;
-            this.value = raw;
-            this.setSelectionRange(pos, pos);
+
+        const rawParts = raw.split(".");
+        const integerPart = rawParts[0] || "";
+        const decimalPart = rawParts.length > 1 ? rawParts[1] : null;
+        const groupedInteger = integerPart.replace(
+            /\B(?=(\d{3})+(?!\d))/g,
+            ","
+        );
+        const formatted = groupedInteger +
+            (decimalPart !== null ? "." + decimalPart : "");
+
+        // Count digits on the left side of the old cursor. This lets the
+        // cursor stay beside the digit the user just edited after commas
+        // are inserted or removed.
+        const prefixParts = prefix.replace(/[^\d.]/g, "").split(".");
+        const integerDigitsBefore = (prefixParts[0] || "")
+            .replace(/\D/g, "").length;
+        const decimalDigitsBefore = prefixParts.length > 1
+            ? (prefixParts[1] || "").replace(/\D/g, "").length
+            : 0;
+
+        let caret = 0;
+        if (prefix.includes(".") && decimalPart !== null) {
+            caret = groupedInteger.length + 1 + decimalDigitsBefore;
+        } else {
+            let digitsSeen = 0;
+            while (caret < groupedInteger.length &&
+                digitsSeen < integerDigitsBefore) {
+                if (/\d/.test(groupedInteger[caret])) {
+                    digitsSeen += 1;
+                }
+                caret += 1;
+            }
+        }
+
+        if (this.value !== formatted) {
+            this.value = formatted;
+            this.setSelectionRange(caret, caret);
         }
     });
 }

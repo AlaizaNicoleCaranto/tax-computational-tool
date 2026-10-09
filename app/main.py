@@ -11,6 +11,8 @@
 #
 # All routes here are protected by @login_required.
 
+import math
+
 from flask import (
     Blueprint,
     abort,
@@ -169,11 +171,21 @@ def tax_table():
                     )
                     r = (float(rate_str) / 100) if rate_str else 0.0
 
-                    if thresh < 0 or btax < 0 or r < 0 or r > 1:
+                    if (
+                        not all(math.isfinite(value) for value in (
+                            thresh, btax, r,
+                        ))
+                        or thresh < 0
+                        or btax < 0
+                        or r < 0
+                        or r > 1
+                    ):
                         raise ValueError(
-                            "Negative amounts or rates outside 0-100% are not allowed."
+                            "Amounts must be finite and non-negative, and rates must be between 0 and 100%."
                         )
-                    if upper is not None and upper <= thresh:
+                    if upper is not None and (
+                        not math.isfinite(upper) or upper <= thresh
+                    ):
                         raise ValueError(
                             f"Bracket {i+1}: 'But Not Over' ({upper:,.2f}) must be greater than 'Over' ({thresh:,.2f})."
                         )
@@ -194,6 +206,29 @@ def tax_table():
                     raise ValueError("At least one tax bracket is required.")
 
                 new_brackets.sort(key=lambda b: b["threshold"])
+
+                if new_brackets[0]["threshold"] != 0:
+                    raise ValueError(
+                        "The first tax bracket must start at 0."
+                    )
+
+                for index in range(1, len(new_brackets)):
+                    previous = new_brackets[index - 1]
+                    current = new_brackets[index]
+                    if previous["upper_amount"] is None:
+                        raise ValueError(
+                            f"Bracket {index} must have an upper limit before the next bracket."
+                        )
+                    if not math.isclose(
+                        previous["upper_amount"],
+                        current["threshold"],
+                        rel_tol=0.0,
+                        abs_tol=1e-9,
+                    ):
+                        raise ValueError(
+                            "Tax brackets must be continuous: each bracket's "
+                            "upper limit must equal the next bracket's threshold."
+                        )
 
                 TaxBracket.query.delete()
                 for b_data in new_brackets:
